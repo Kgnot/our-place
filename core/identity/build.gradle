@@ -1,0 +1,38 @@
+plugins {
+    id 'java'
+    alias(libs.plugins.springBoot)
+    alias(libs.plugins.springDependencyManagement)
+}
+
+description = 'Identity Service - Manages authentication, authorization, and user identity'
+
+dependencies {
+    // Spring Security (Identity-specific)
+    implementation libs.spring.boot.starter.security
+
+    // JWT / Token Management
+    implementation libs.jjwt.api
+    runtimeOnly libs.jjwt.impl
+    runtimeOnly libs.jjwt.jackson
+
+    // OAuth2 / OpenID Connect
+    implementation libs.spring.security.oauth2.resource.server
+    implementation libs.spring.security.oauth2.jose
+
+    // Password Encoding
+    implementation libs.spring.security.crypto
+
+    // Audit logging
+    implementation libs.spring.data.envers
+
+    // Testing security
+    testImplementation libs.spring.boot.starter.security.test
+}
+
+bootJar {
+    mainClass = 'org.our_place.IdentityApplication'
+}
+
+jar {
+    enabled = false
+}

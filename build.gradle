@@ -1,0 +1,85 @@
+plugins {
+    id 'java'
+    alias(libs.plugins.springBoot)
+    alias(libs.plugins.springDependencyManagement)
+}
+
+allprojects {
+    group = 'org.our_place'
+    version = '0.0.1-SNAPSHOT'
+    description = 'our-place-backend'
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+// Cada módulo sigue agregando sus propias dependencias específicas en su propio build.gradle.
+configure(subprojects.findAll { it.name in ['calendar', 'identity', 'map', 'app'] }) {
+    // El BOM de Spring Cloud le da versión a los 'spring-cloud-starter-*'.
+    plugins.withId('io.spring.dependency-management') {
+        dependencyManagement {
+            imports {
+                mavenBom "org.springframework.cloud:spring-cloud-dependencies:${libs.versions.springCloud.get()}"
+            }
+        }
+    }
+
+    // Esperamos a que el propio build.gradle del subproyecto aplique el plugin de Spring Boot
+    plugins.withId('org.springframework.boot') {
+        dependencies {
+            implementation libs.spring.boot.starter.web
+            implementation libs.spring.boot.starter.data.jpa
+            implementation libs.spring.boot.starter.validation
+
+            runtimeOnly libs.postgresql
+
+            implementation libs.spring.boot.starter.actuator
+            runtimeOnly libs.micrometer.new.relic
+
+            implementation libs.spring.cloud.starter.circuitbreaker.resilience4j
+
+            implementation libs.spring.boot.starter.cache
+            implementation libs.caffeine
+
+            implementation libs.springdoc.openapi
+            implementation libs.commons.lang3
+
+            compileOnly libs.lombok
+            annotationProcessor libs.lombok
+
+            developmentOnly libs.spring.boot.devtools
+
+            testImplementation libs.spring.boot.starter.test
+            testImplementation libs.spring.boot.starter.data.jpa.test
+            testImplementation libs.h2
+            testImplementation libs.junit.platform.launcher
+            testCompileOnly libs.lombok
+            testAnnotationProcessor libs.lombok
+        }
+    }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${libs.versions.springCloud.get()}"
+    }
+}

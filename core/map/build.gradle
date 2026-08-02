@@ -1,0 +1,44 @@
+plugins {
+    id 'java'
+    alias(libs.plugins.springBoot)
+    alias(libs.plugins.springDependencyManagement)
+}
+
+description = 'Map Service - Manages geolocation, mapping, and real-time location tracking'
+
+dependencies {
+    // WebSocket for real-time communication
+    implementation libs.spring.boot.starter.websocket
+    implementation libs.spring.boot.starter.webflux
+
+    // PostGIS for geospatial queries
+    implementation libs.bundles.geospatial
+
+    // Messaging for real-time updates
+    implementation libs.spring.boot.starter.amqp
+
+    // Redis for caching locations
+    implementation libs.spring.boot.starter.data.redis
+    implementation libs.jedis
+
+    // Task scheduling for location updates
+    implementation libs.spring.boot.starter.task
+
+    // JSON datetime support
+    implementation libs.jackson.datatype.jsr310
+
+    // File utilities
+    implementation libs.commons.io
+
+    // Testing WebSocket
+    testImplementation libs.spring.boot.starter.websocket.test
+    testImplementation libs.reactor.test
+}
+
+bootJar {
+    mainClass = 'org.our_place.MapApplication'
+}
+
+jar {
+    enabled = false
+}

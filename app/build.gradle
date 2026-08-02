@@ -1,0 +1,6 @@
+plugins {
+    alias(libs.plugins.springBoot)
+    alias(libs.plugins.springDependencyManagement)
+}
+
+description = 'Main Application - Entry point for the Our Place backend services'

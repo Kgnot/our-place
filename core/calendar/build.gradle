@@ -1,0 +1,24 @@
+plugins {
+    id 'java'
+    alias(libs.plugins.springBoot)
+    alias(libs.plugins.springDependencyManagement)
+}
+
+description = 'Calendar Service - Manages events, scheduling, and calendar operations'
+
+dependencies {
+    // DateTime handling (Calendar-specific)
+    implementation libs.joda.time
+    implementation libs.jackson.datatype.jsr310
+
+    // REST API support
+    implementation libs.spring.boot.starter.data.rest
+}
+
+bootJar {
+    mainClass = 'org.our_place.CalendarApplication'
+}
+
+jar {
+    enabled = false
+}
