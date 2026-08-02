@@ -3,7 +3,7 @@ management:
   newrelic:
     metrics:
       export:
-        enabled: true
+        enabled: false
         api-key: ${NEW_RELIC_LICENSE_KEY}
         account-id: ${NEWRELIC_ACCOUNT_ID}
         step: 30s
