@@ -1,0 +1,8 @@
+plugins {
+    id 'java'
+    alias(libs.plugins.springBoot)
+    alias(libs.plugins.springDependencyManagement)
+}
+
+description = 'Notification Service - Handles sending and receiving notifications'
+

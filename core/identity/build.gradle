@@ -29,9 +29,9 @@ dependencies {
     testImplementation libs.spring.boot.starter.security.test
 }
 
-bootJar {
-    mainClass = 'org.our_place.IdentityApplication'
-}
+//bootJar {
+//    mainClass = 'org.our_place.IdentityApplication'
+//}
 
 jar {
     enabled = false

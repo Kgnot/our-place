@@ -15,9 +15,9 @@ dependencies {
     implementation libs.spring.boot.starter.data.rest
 }
 
-bootJar {
-    mainClass = 'org.our_place.CalendarApplication'
-}
+//bootJar {
+//    mainClass = 'org.our_place.CalendarApplication'
+//}
 
 jar {
     enabled = false

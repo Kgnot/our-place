@@ -35,9 +35,9 @@ dependencies {
     testImplementation libs.reactor.test
 }
 
-bootJar {
-    mainClass = 'org.our_place.MapApplication'
-}
+//bootJar {
+//    mainClass = 'org.our_place.MapApplication'
+//}
 
 jar {
     enabled = false

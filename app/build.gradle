@@ -4,3 +4,25 @@ plugins {
 }
 
 description = 'Main Application - Entry point for the Our Place backend services'
+
+dependencies {
+    // propias
+    implementation project(':core:common')
+    // Lo específico de emitir/validar JWT — SOLO identity lo necesita
+    implementation libs.jjwt.api
+    runtimeOnly libs.jjwt.impl
+    runtimeOnly libs.jjwt.jackson
+    implementation libs.spring.security.oauth2.resource.server
+    implementation libs.spring.security.oauth2.jose
+    implementation libs.spring.security.crypto
+    implementation libs.spring.data.envers
+}
+
+bootJar {
+    mainClass = 'org.our_place.ourplacebackend.OurPlaceBackendApplication'
+}
+
+jar {
+    enabled = false
+}
+

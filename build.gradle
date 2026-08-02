@@ -32,9 +32,12 @@ repositories {
     mavenCentral()
 }
 
+// Dependencias comunes para los servicios "core" (calendar, identity, map, app).
 // Cada módulo sigue agregando sus propias dependencias específicas en su propio build.gradle.
 configure(subprojects.findAll { it.name in ['calendar', 'identity', 'map', 'app'] }) {
     // El BOM de Spring Cloud le da versión a los 'spring-cloud-starter-*'.
+    // Se importa por-subproyecto: cada uno tiene su propia instancia de dependencyManagement,
+    // así que importarlo solo en el root (más abajo) no alcanza a estos subproyectos.
     plugins.withId('io.spring.dependency-management') {
         dependencyManagement {
             imports {
@@ -44,6 +47,8 @@ configure(subprojects.findAll { it.name in ['calendar', 'identity', 'map', 'app'
     }
 
     // Esperamos a que el propio build.gradle del subproyecto aplique el plugin de Spring Boot
+    // (vía alias(libs.plugins.springBoot)). Antes de eso, configuraciones como
+    // 'developmentOnly' o 'annotationProcessor' todavía no existen en el proyecto.
     plugins.withId('org.springframework.boot') {
         dependencies {
             implementation libs.spring.boot.starter.web
@@ -54,6 +59,8 @@ configure(subprojects.findAll { it.name in ['calendar', 'identity', 'map', 'app'
 
             implementation libs.spring.boot.starter.actuator
             runtimeOnly libs.micrometer.new.relic
+
+            implementation libs.spring.boot.starter.security
 
             implementation libs.spring.cloud.starter.circuitbreaker.resilience4j
 
