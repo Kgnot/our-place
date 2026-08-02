@@ -1,16 +1,39 @@
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: our_place_db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-ourplace}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: our_place
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "8080:8080"
     environment:
       NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
       NEW_RELIC_APP_NAME: ${NEW_RELIC_APP_NAME}
       NEW_RELIC_LOG_LEVEL: ${NEW_RELIC_LOG_LEVEL:-info}
-      DB_URL: ${DB_URL}
+      DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-ourplace}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
     restart: unless-stopped
+
+volumes:
+  pgdata:
