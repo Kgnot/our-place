@@ -26,10 +26,10 @@ public class SecurityConfig {
                 .toArray(String[]::new);
 
         http.authorizeHttpRequests(auth -> auth
-                        .requestMatchers(publicPaths).permitAll()
-                        .requestMatchers("/actuator/health", "/actuator/**").permitAll()
-                        .anyRequest().authenticated()
-                );
+                .requestMatchers(publicPaths).permitAll()
+                .requestMatchers("/actuator/health", "/actuator/**").permitAll()
+                .anyRequest().authenticated()
+        );
         return http.build();
     }
 

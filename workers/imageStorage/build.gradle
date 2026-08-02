@@ -16,17 +16,11 @@ dependencies {
     implementation libs.aws.s3
     implementation libs.aws.s3.transfer.manager
 
-    // Image Processing
-    implementation libs.bundles.image.processing
-
     // File handling
     implementation libs.bundles.file.handling
 
     // Validation
     implementation libs.spring.boot.starter.validation
-
-    // Async processing
-    implementation libs.spring.boot.starter.task
 
     // Monitoring
     implementation libs.spring.boot.starter.actuator

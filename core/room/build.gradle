@@ -4,8 +4,7 @@ plugins {
     alias(libs.plugins.springDependencyManagement)
 }
 
-description = 'Notification Service - Handles sending and receiving notifications'
-
+description = 'Room Service - Manage CRUD operations for rooms, including availability, pricing, and reservations'
 
 dependencies {
     // Módulo transversal (JwtAuthenticationFilter, PublicEndpoints, AuthenticatedUser, etc.)

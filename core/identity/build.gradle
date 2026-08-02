@@ -7,6 +7,7 @@ plugins {
 description = 'Identity Service - Manages authentication, authorization, and user identity'
 
 dependencies {
+    implementation project(':core:common')
     // Spring Security (Identity-specific)
     implementation libs.spring.boot.starter.security
 

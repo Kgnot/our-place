@@ -1,9 +1,16 @@
 rootProject.name = 'our-place-backend'
 
+//app
 include 'app'
+//workers
+include 'workers:email'
 include 'workers:imageStorage'
+//main
 include 'core:calendar'
 include 'core:identity'
 include 'core:map'
 include 'core:notification'
 include 'core:common'
+include 'core:billing'
+include 'core:gallery'
+include 'core:room'

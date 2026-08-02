@@ -7,22 +7,18 @@ plugins {
 description = 'Map Service - Manages geolocation, mapping, and real-time location tracking'
 
 dependencies {
+    // Módulo transversal (JwtAuthenticationFilter, PublicEndpoints, AuthenticatedUser, etc.)
+    implementation project(':core:common')
+
+
     // WebSocket for real-time communication
     implementation libs.spring.boot.starter.websocket
     implementation libs.spring.boot.starter.webflux
 
     // PostGIS for geospatial queries
-    implementation libs.bundles.geospatial
-
-    // Messaging for real-time updates
-    implementation libs.spring.boot.starter.amqp
-
-    // Redis for caching locations
-    implementation libs.spring.boot.starter.data.redis
-    implementation libs.jedis
-
-    // Task scheduling for location updates
-    implementation libs.spring.boot.starter.task
+    implementation(libs.bundles.geospatial) {
+        exclude group: 'javax.media', module: 'jai_core'
+    }
 
     // JSON datetime support
     implementation libs.jackson.datatype.jsr310

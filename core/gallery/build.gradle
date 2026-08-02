@@ -4,11 +4,9 @@ plugins {
     alias(libs.plugins.springDependencyManagement)
 }
 
-description = 'Notification Service - Handles sending and receiving notifications'
-
+description = 'Gallery Service - manage read operation to the gallery (images, videos, etc.)'
 
 dependencies {
     // Módulo transversal (JwtAuthenticationFilter, PublicEndpoints, AuthenticatedUser, etc.)
     implementation project(':core:common')
-
 }

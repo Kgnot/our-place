@@ -8,6 +8,8 @@ description = 'Calendar Service - Manages events, scheduling, and calendar opera
 
 dependencies {
     // DateTime handling (Calendar-specific)
+    implementation project(':core:common')
+
     implementation libs.joda.time
     implementation libs.jackson.datatype.jsr310
 

@@ -33,11 +33,10 @@ spring-boot-starter-webflux = { module = "org.springframework.boot:spring-boot-s
 spring-boot-starter-websocket = { module = "org.springframework.boot:spring-boot-starter-websocket" }
 spring-boot-starter-data-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa" }
 spring-boot-starter-data-rest = { module = "org.springframework.boot:spring-boot-starter-data-rest" }
-spring-boot-starter-data-redis = { module = "org.springframework.boot:spring-boot-starter-data-redis" }
+#spring-boot-starter-data-redis = { module = "org.springframework.boot:spring-boot-starter-data-redis" }
 spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation" }
-spring-boot-starter-task = { module = "org.springframework.boot:spring-boot-starter-task" }
 spring-boot-starter-cache = { module = "org.springframework.boot:spring-boot-starter-cache" }
-spring-boot-starter-amqp = { module = "org.springframework.boot:spring-boot-starter-amqp" }
+#spring-boot-starter-amqp = { module = "org.springframework.boot:spring-boot-starter-amqp" }
 spring-boot-starter-security = { module = "org.springframework.boot:spring-boot-starter-security" }
 spring-boot-starter-logging = { module = "org.springframework.boot:spring-boot-starter-logging" }
 spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
@@ -57,7 +56,7 @@ spring-data-envers = { module = "org.springframework.data:spring-data-envers" }
 
 # --- Spring Cloud ---
 spring-cloud-starter-circuitbreaker-resilience4j = { module = "org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j" }
-spring-cloud-starter-netflix-eureka-client = { module = "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client" }
+#spring-cloud-starter-netflix-eureka-client = { module = "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client" }
 
 # --- Base de datos ---
 postgresql = { module = "org.postgresql:postgresql" }
@@ -100,6 +99,10 @@ caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "c
 # --- Documentación de API ---
 springdoc-openapi = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdocOpenapi" }
 
+# --- Email (worker) ---
+spring-boot-starter-mail = { module = "org.springframework.boot:spring-boot-starter-mail" }
+spring-boot-starter-thymeleaf = { module = "org.springframework.boot:spring-boot-starter-thymeleaf" }
+
 # --- Monitoreo ---
 micrometer-new-relic = { module = "io.micrometer:micrometer-registry-new-relic" }
 
@@ -112,6 +115,6 @@ mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockito
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 
 [bundles]
-image-processing = ["thumbnailator", "imgscalr"]
+#image-processing = ["thumbnailator", "imgscalr"]
 file-handling = ["commons-io", "commons-fileupload"]
 geospatial = ["hibernate-spatial", "jts-core", "geotools-main", "geotools-epsg-hsql", "geotools-referencing"]

@@ -1,0 +1,10 @@
+plugins {
+    id 'java'
+    alias(libs.plugins.springBoot)
+    alias(libs.plugins.springDependencyManagement)
+}
+
+description = 'Common service - manage common functionalities for all services (authentication, authorization, etc.)'
+
+dependencies {
+}

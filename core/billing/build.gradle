@@ -1,0 +1,24 @@
+plugins {
+    id 'java'
+    alias(libs.plugins.springBoot)
+    alias(libs.plugins.springDependencyManagement)
+}
+
+description = 'Billing Service - Manages subscriptions, invoices, and payment processing'
+
+dependencies {
+    // Módulo transversal (JwtAuthenticationFilter, PublicEndpoints, AuthenticatedUser, etc.)
+    implementation project(':core:common')
+
+    // SDK del proveedor de pagos (ej. Stripe: 'com.stripe:stripe-java:<version>')
+    implementation 'com.stripe:stripe-java:20.129.0'
+
+}
+//
+//bootJar {
+//    mainClass = 'org.our_place.billing.BillingApplication'
+//}
+
+jar {
+    enabled = false
+}
