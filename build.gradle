@@ -38,7 +38,7 @@ repositories {
 
 
 configure(subprojects.findAll { it.name in
-        ['billing', 'calendar', 'common', 'gallery', 'identity', 'map', 'notification', 'room', 'app'] }) {
+        ['billing', 'calendar', 'common', 'gallery', 'identity', 'map', 'notification', 'room', 'app','shared'] }) {
 
     plugins.withId('io.spring.dependency-management') {
         dependencyManagement {
