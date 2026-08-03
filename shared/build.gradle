@@ -7,5 +7,4 @@ plugins {
 description = 'Shared - Common utilities and configurations for general applications'
 
 dependencies {
-    implementation project(':core:identity')
 }
