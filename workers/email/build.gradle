@@ -20,7 +20,7 @@ dependencies {
     annotationProcessor libs.lombok
 
     // Development
-    developmentOnly libs.spring.boot.devtools
+    //    developmentOnly libs.spring.boot.devtools
 
     // Testing
     testImplementation libs.spring.boot.starter.test

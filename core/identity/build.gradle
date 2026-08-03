@@ -8,6 +8,7 @@ description = 'Identity Service - Manages authentication, authorization, and use
 
 dependencies {
     implementation project(':core:common')
+    implementation project(':shared')
     // Spring Security (Identity-specific)
     implementation libs.spring.boot.starter.security
 
@@ -30,10 +31,11 @@ dependencies {
     testImplementation libs.spring.boot.starter.security.test
 }
 
-//bootJar {
-//    mainClass = 'org.our_place.IdentityApplication'
-//}
-
-jar {
+bootJar {
     enabled = false
+}
+
+// 2. Activar el .jar normal (para que 'app' pueda importarlo como librería)
+jar {
+    enabled = true
 }

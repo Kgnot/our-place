@@ -1,5 +1,6 @@
 package org.our_place.common.shared.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.our_place.common.shared.SharedApi;
 import org.our_place.common.shared.SharedDomain;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 public class ArchitectureScannerService {
 
     public List<SharedItemDto> scanSharedItems() {
@@ -33,6 +35,8 @@ public class ArchitectureScannerService {
         scanner.addIncludeFilter(new AnnotationTypeFilter(SharedApi.class));
         scanner.addIncludeFilter(new AnnotationTypeFilter(SharedDomain.class));
 
+        var candidates = scanner.findCandidateComponents(basePackage);
+        log.info("Candidatos encontrados: {}", candidates.size());
         for (var beanDefinition : scanner.findCandidateComponents(basePackage)) {
             String className = beanDefinition.getBeanClassName();
             try {
