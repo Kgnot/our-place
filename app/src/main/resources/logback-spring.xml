@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Importa la configuración por defecto de Spring Boot -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <!-- Modificamos el patrón para incluir [%X{traceId}] -->
+    <!-- %X busca en el MDC (Mapped Diagnostic Context) de SLF4J -->
+    <property name="CONSOLE_LOG_PATTERN" value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) [%X{traceId}] %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx"/>
+
+    <!-- Perfil de Desarrollo (logs en color y con todo el detalle) -->
+    <springProfile name="dev">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+        <!-- Puedes poner paquetes tuyos en DEBUG si quieres -->
+        <logger name="org.our_place" level="DEBUG"/>
+    </springProfile>
+
+    <!-- Perfil de Producción (solo WARN y ERROR a la consola, INFO a un archivo) -->
+    <springProfile name="prod">
+        <root level="WARN">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+</configuration>

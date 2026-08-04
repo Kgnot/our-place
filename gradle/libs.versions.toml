@@ -22,11 +22,14 @@ jedis = "5.1.0"
 caffeine = "3.1.8"
 springdocOpenapi = "2.3.0"
 
+archunit= "1.2.1"
 [plugins]
 springBoot = { id = "org.springframework.boot", version.ref = "springBoot" }
 springDependencyManagement = { id = "io.spring.dependency-management", version.ref = "springDependencyManagement" }
 
 [libraries]
+# --- Arch unit
+archunit = { module = "com.tngtech.archunit:archunit-junit5", version.ref = "archunit" }
 # --- Spring Boot starters (versión gestionada por el BOM de Spring Boot) ---
 spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web" }
 spring-boot-starter-webflux = { module = "org.springframework.boot:spring-boot-starter-webflux" }
