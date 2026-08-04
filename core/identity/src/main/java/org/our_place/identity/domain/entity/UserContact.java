@@ -1,4 +1,4 @@
-package org.our_place.identity.entity;
+package org.our_place.identity.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -8,7 +8,6 @@ import java.time.OffsetDateTime;
 @Entity
 @Table(name = "user_contact", schema = "identity")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserContact {
@@ -34,4 +33,18 @@ public class UserContact {
 
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
+
+    // --- Comportamiento del value object ---
+
+    public void verify() {
+        this.isVerified = true;
+    }
+
+    public void markAsPrimary() {
+        this.isPrimary = true;
+    }
+
+    public void unmarkAsPrimary() {
+        this.isPrimary = false;
+    }
 }
