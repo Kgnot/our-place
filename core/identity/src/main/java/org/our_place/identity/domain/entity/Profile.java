@@ -1,4 +1,4 @@
-package org.our_place.identity.entity;
+package org.our_place.identity.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
