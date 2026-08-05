@@ -10,7 +10,7 @@ public class IdentityPublicEndpoints {
     @Bean
     public PublicEndpoints publicEndpoints() {
         return () -> new String[]{
-                "api/v1/auth/**"
+                "/api/v1/auth/**"
         };
     }
 }
