@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.our_place.identity.application.service.dto.UserProfileDto;
 import org.our_place.identity.domain.entity.UsersLogin;
 import org.our_place.identity.domain.exception.UserNotFoundException;
-import org.our_place.identity.persistence.repository.UsersLoginRepository;
+import org.our_place.identity.infra.repository.UsersLoginRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

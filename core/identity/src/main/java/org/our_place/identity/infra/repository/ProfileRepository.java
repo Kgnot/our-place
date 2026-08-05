@@ -1,4 +1,4 @@
-package org.our_place.identity.persistence.repository;
+package org.our_place.identity.infra.repository;
 
 import org.our_place.identity.domain.entity.Profile;
 import org.springframework.data.jpa.repository.JpaRepository;

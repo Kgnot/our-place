@@ -1,4 +1,4 @@
-package org.our_place.identity.provider;
+package org.our_place.identity.infra.provider;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;

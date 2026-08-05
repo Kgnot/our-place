@@ -7,7 +7,7 @@ import org.our_place.identity.application.usecase.output.VerifyUserContactOutput
 import org.our_place.identity.domain.entity.UserContact;
 import org.our_place.identity.domain.entity.UserContactId;
 import org.our_place.identity.domain.exception.UserContactNotFoundException;
-import org.our_place.identity.persistence.repository.UserContactRepository;
+import org.our_place.identity.infra.repository.UserContactRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
