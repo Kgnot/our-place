@@ -4,8 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.our_place.identity.domain.exception.InvalidCredentialsException;
 import org.our_place.identity.domain.exception.UserLockedException;
 import org.our_place.identity.domain.vo.Email;
+import org.our_place.identity.domain.vo.UserStatus;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -33,13 +35,13 @@ public class UsersLogin {
     /**
      * Nullable: a futuro habrá login solo-OAuth (Google/Apple) sin password local.
      */
-    @Column(name = "password_hash", length = 255)
+    @Column(name = "password_hash")
     private String passwordHash;
 
     @Column(name = "auth_provider", length = 20, nullable = false)
     private String authProvider = "local";
 
-    @Column(name = "provider_user_id", length = 255)
+    @Column(name = "provider_user_id")
     private String providerUserId;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -55,7 +57,7 @@ public class UsersLogin {
     @Column(name = "locked_until")
     private OffsetDateTime lockedUntil;
 
-    @Column(name = "password_reset_token", length = 255)
+    @Column(name = "password_reset_token")
     private String passwordResetToken;
 
     @Column(name = "password_reset_expires_at")
@@ -73,7 +75,11 @@ public class UsersLogin {
     @UpdateTimestamp
     private OffsetDateTime updatedAt;
 
-    // create
+    // --- RELACIÓN BIDIRECCIONAL 1:1 ---
+    @OneToOne(mappedBy = "usersLogin", cascade = CascadeType.ALL)
+    private Profile profile;
+
+    // --- FACTORY METHOD ---
     public static UsersLogin create(
             String rawEmail,
             String passwordHash,
@@ -93,13 +99,17 @@ public class UsersLogin {
         return user;
     }
 
-
-    // comportamiento del agregado -- tipo entidad
+    // --- COMPORTAMIENTO DEL AGREGADO ---
     public boolean isLocked() {
         return lockedUntil != null && lockedUntil.isAfter(OffsetDateTime.now());
     }
 
     public void assertCanLogin() {
+        UserStatus currentStatus = new UserStatus(this.status.getCode());
+        if (!currentStatus.allowsLogin()) {
+            throw new InvalidCredentialsException();
+        }
+        // bloqueo temporal
         if (isLocked()) {
             throw new UserLockedException(this.lockedUntil);
         }

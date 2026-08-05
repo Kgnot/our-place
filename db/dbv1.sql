@@ -1,5 +1,3 @@
-CREATE EXTENSION Postgis;
-
 CREATE SCHEMA "identity";
 
 CREATE SCHEMA "billing";
@@ -15,243 +13,250 @@ CREATE SCHEMA "map";
 CREATE SCHEMA "notification";
 
 CREATE TABLE "identity"."lkp_user_status" (
-                                              "code" varchar(30) PRIMARY KEY,
-                                              "name" varchar(100) NOT NULL
+  "code" varchar(30) PRIMARY KEY,
+  "name" varchar(100) NOT NULL
 );
 
 CREATE TABLE "identity"."lkp_contact_type" (
-                                               "code" varchar(20) PRIMARY KEY,
-                                               "name" varchar(50) NOT NULL
+  "code" varchar(20) PRIMARY KEY,
+  "name" varchar(50) NOT NULL
 );
 
 CREATE TABLE "identity"."lkp_role" (
-                                       "code" varchar(30) PRIMARY KEY,
-                                       "name" varchar(100) NOT NULL
+  "code" varchar(30) PRIMARY KEY,
+  "name" varchar(100) NOT NULL
 );
 
 CREATE TABLE "identity"."users_login" (
-                                          "id" uuid PRIMARY KEY,
-                                          "email" varchar(255) UNIQUE NOT NULL,
-                                          "password_hash" varchar(255),
-                                          "auth_provider" varchar(20) NOT NULL DEFAULT 'local',
-                                          "provider_user_id" varchar(255),
-                                          "status_code" varchar(30) NOT NULL,
-                                          "mfa_enabled" boolean NOT NULL DEFAULT false,
-                                          "failed_login_attempts" smallint NOT NULL DEFAULT 0,
-                                          "locked_until" timestamptz,
-                                          "password_reset_token" varchar(255),
-                                          "password_reset_expires_at" timestamptz,
-                                          "last_login_at" timestamptz,
-                                          "created_at" timestamptz NOT NULL,
-                                          "updated_at" timestamptz NOT NULL
+  "id" uuid PRIMARY KEY,
+  "email" varchar(255) UNIQUE NOT NULL,
+  "password_hash" varchar(255),
+  "auth_provider" varchar(20) NOT NULL DEFAULT 'local',
+  "provider_user_id" varchar(255),
+  "status_code" varchar(30) NOT NULL,
+  "mfa_enabled" boolean NOT NULL DEFAULT false,
+  "failed_login_attempts" smallint NOT NULL DEFAULT 0,
+  "locked_until" timestamptz,
+  "password_reset_token" varchar(255),
+  "password_reset_expires_at" timestamptz,
+  "last_login_at" timestamptz,
+  "created_at" timestamptz NOT NULL,
+  "updated_at" timestamptz NOT NULL
 );
 
 CREATE TABLE "identity"."profile" (
-                                      "user_login_id" uuid PRIMARY KEY,
-                                      "first_name" varchar(100) NOT NULL,
-                                      "last_name" varchar(100),
-                                      "avatar_url" varchar(500),
-                                      "birth_date" date,
-                                      "timezone" varchar(50) DEFAULT 'America/Bogota',
-                                      "locale" varchar(10) DEFAULT 'es-CO',
-                                      "created_at" timestamptz NOT NULL
+  "user_login_id" uuid PRIMARY KEY,
+  "first_name" varchar(100) NOT NULL,
+  "last_name" varchar(100),
+  "avatar_url" varchar(500),
+  "birth_date" date,
+  "timezone" varchar(50) DEFAULT 'America/Bogota',
+  "locale" varchar(10) DEFAULT 'es-CO',
+  "created_at" timestamptz NOT NULL
 );
 
 CREATE TABLE "identity"."user_contact" (
-                                           "user_login_id" uuid,
-                                           "contact_type_code" varchar(20),
-                                           "value" varchar(255) NOT NULL,
-                                           "is_primary" boolean NOT NULL DEFAULT false,
-                                           "is_verified" boolean NOT NULL DEFAULT false,
-                                           "created_at" timestamptz NOT NULL,
-                                           PRIMARY KEY ("user_login_id", "contact_type_code", "value")
+  "user_login_id" uuid,
+  "contact_type_code" varchar(20),
+  "value" varchar(255) NOT NULL,
+  "is_primary" boolean NOT NULL DEFAULT false,
+  "is_verified" boolean NOT NULL DEFAULT false,
+  "created_at" timestamptz NOT NULL,
+  PRIMARY KEY ("user_login_id", "contact_type_code", "value")
+);
+
+CREATE TABLE "identity"."user_role" (
+  "user_login_id" uuid NOT NULL,
+  "role_code" varchar(30) NOT NULL,
+  "granted_at" timestamptz NOT NULL,
+  PRIMARY KEY ("user_login_id", "role_code")
 );
 
 CREATE TABLE "billing"."plan" (
-                                  "code" varchar(30) PRIMARY KEY,
-                                  "name" varchar(100) NOT NULL,
-                                  "storage_quota_bytes" bigint NOT NULL,
-                                  "max_members" smallint NOT NULL DEFAULT 2,
-                                  "price_cents" integer NOT NULL DEFAULT 0,
-                                  "billing_period" varchar(20),
-                                  "is_active" boolean NOT NULL DEFAULT true
+  "code" varchar(30) PRIMARY KEY,
+  "name" varchar(100) NOT NULL,
+  "storage_quota_bytes" bigint NOT NULL,
+  "max_members" smallint NOT NULL DEFAULT 2,
+  "price_cents" integer NOT NULL DEFAULT 0,
+  "billing_period" varchar(20),
+  "is_active" boolean NOT NULL DEFAULT true
 );
 
 CREATE TABLE "billing"."room_subscription" (
-                                               "room_id" uuid PRIMARY KEY,
-                                               "plan_code" varchar(30) NOT NULL,
-                                               "status" varchar(20) NOT NULL DEFAULT 'active',
-                                               "storage_used_bytes" bigint NOT NULL DEFAULT 0,
-                                               "started_at" timestamptz NOT NULL,
-                                               "current_period_end" timestamptz
+  "room_id" uuid PRIMARY KEY,
+  "plan_code" varchar(30) NOT NULL,
+  "status" varchar(20) NOT NULL DEFAULT 'active',
+  "storage_used_bytes" bigint NOT NULL DEFAULT 0,
+  "started_at" timestamptz NOT NULL,
+  "current_period_end" timestamptz
 );
 
 CREATE TABLE "room"."lkp_room_status" (
-                                          "code" varchar(30) PRIMARY KEY,
-                                          "name" varchar(100) NOT NULL
+  "code" varchar(30) PRIMARY KEY,
+  "name" varchar(100) NOT NULL
 );
 
 CREATE TABLE "room"."lkp_relationship_type" (
-                                                "code" varchar(40) PRIMARY KEY,
-                                                "name" varchar(100) NOT NULL
+  "code" varchar(40) PRIMARY KEY,
+  "name" varchar(100) NOT NULL
 );
 
 CREATE TABLE "room"."rooms" (
-                                "id" uuid PRIMARY KEY,
-                                "name" varchar(150) NOT NULL,
-                                "status_code" varchar(30) NOT NULL,
-                                "relationship_type_code" varchar(40),
-                                "owner_user_id" uuid NOT NULL,
-                                "anniversary_date" date,
-                                "timezone" varchar(50) DEFAULT 'America/Bogota',
-                                "created_at" timestamptz NOT NULL
+  "id" uuid PRIMARY KEY,
+  "name" varchar(150) NOT NULL,
+  "status_code" varchar(30) NOT NULL,
+  "relationship_type_code" varchar(40),
+  "owner_user_id" uuid NOT NULL,
+  "anniversary_date" date,
+  "timezone" varchar(50) DEFAULT 'America/Bogota',
+  "created_at" timestamptz NOT NULL
 );
 
 CREATE TABLE "room"."room_member" (
-                                      "room_id" uuid,
-                                      "user_login_id" uuid,
-                                      "role_code" varchar(30) NOT NULL,
-                                      "status" varchar(20) NOT NULL DEFAULT 'active',
-                                      "invited_by_user_id" uuid,
-                                      "nickname" varchar(50),
-                                      "joined_at" timestamptz NOT NULL,
-                                      PRIMARY KEY ("room_id", "user_login_id")
+  "room_id" uuid,
+  "user_login_id" uuid,
+  "role_code" varchar(30) NOT NULL,
+  "status" varchar(20) NOT NULL DEFAULT 'active',
+  "invited_by_user_id" uuid,
+  "nickname" varchar(50),
+  "joined_at" timestamptz NOT NULL,
+  PRIMARY KEY ("room_id", "user_login_id")
 );
 
 CREATE TABLE "room"."room_invitation" (
-                                          "id" bigserial PRIMARY KEY,
-                                          "room_id" uuid NOT NULL,
-                                          "invited_email" varchar(255) NOT NULL,
-                                          "invited_by_user_id" uuid NOT NULL,
-                                          "role_code" varchar(30) NOT NULL,
-                                          "token" varchar(255) UNIQUE NOT NULL,
-                                          "status" varchar(20) NOT NULL DEFAULT 'pending',
-                                          "expires_at" timestamptz NOT NULL,
-                                          "created_at" timestamptz NOT NULL,
-                                          "accepted_at" timestamptz
+  "id" bigserial PRIMARY KEY,
+  "room_id" uuid NOT NULL,
+  "invited_email" varchar(255) NOT NULL,
+  "invited_by_user_id" uuid NOT NULL,
+  "role_code" varchar(30) NOT NULL,
+  "token" varchar(255) UNIQUE NOT NULL,
+  "status" varchar(20) NOT NULL DEFAULT 'pending',
+  "expires_at" timestamptz NOT NULL,
+  "created_at" timestamptz NOT NULL,
+  "accepted_at" timestamptz
 );
 
 CREATE TABLE "room"."member_relationship" (
-                                              "room_id" uuid,
-                                              "member_a_user_id" uuid,
-                                              "member_b_user_id" uuid,
-                                              "relationship_type_code" varchar(40) NOT NULL,
-                                              "since_date" date,
-                                              "created_at" timestamptz NOT NULL,
-                                              PRIMARY KEY ("room_id", "member_a_user_id", "member_b_user_id")
+  "room_id" uuid,
+  "member_a_user_id" uuid,
+  "member_b_user_id" uuid,
+  "relationship_type_code" varchar(40) NOT NULL,
+  "since_date" date,
+  "created_at" timestamptz NOT NULL,
+  PRIMARY KEY ("room_id", "member_a_user_id", "member_b_user_id")
 );
 
 CREATE TABLE "gallery"."lkp_media_type" (
-                                            "code" varchar(20) PRIMARY KEY,
-                                            "name" varchar(50) NOT NULL
+  "code" varchar(20) PRIMARY KEY,
+  "name" varchar(50) NOT NULL
 );
 
 CREATE TABLE "gallery"."lkp_processing_status" (
-                                                   "code" varchar(30) PRIMARY KEY,
-                                                   "name" varchar(100) NOT NULL
+  "code" varchar(30) PRIMARY KEY,
+  "name" varchar(100) NOT NULL
 );
 
 CREATE TABLE "gallery"."media" (
-                                   "id" uuid PRIMARY KEY,
-                                   "room_id" uuid NOT NULL,
-                                   "uploaded_by_user_id" uuid NOT NULL,
-                                   "r2_url" varchar(500) NOT NULL,
-                                   "thumbnail_url" varchar(500),
-                                   "media_type_code" varchar(20) NOT NULL,
-                                   "processing_status_code" varchar(30) NOT NULL,
-                                   "retry_count" smallint NOT NULL DEFAULT 0,
-                                   "error_message" text,
-                                   "file_size_bytes" bigint,
-                                   "mime_type" varchar(100),
-                                   "caption" text,
-                                   "taken_at" timestamptz,
-                                   "location" geography,
-                                   "saved_place_id" uuid,
-                                   "exif_raw_payload" jsonb,
-                                   "deleted_at" timestamptz,
-                                   "purge_at" timestamptz,
-                                   "created_at" timestamptz NOT NULL
+  "id" uuid PRIMARY KEY,
+  "room_id" uuid NOT NULL,
+  "uploaded_by_user_id" uuid NOT NULL,
+  "r2_url" varchar(500) NOT NULL,
+  "thumbnail_url" varchar(500),
+  "media_type_code" varchar(20) NOT NULL,
+  "processing_status_code" varchar(30) NOT NULL,
+  "retry_count" smallint NOT NULL DEFAULT 0,
+  "error_message" text,
+  "file_size_bytes" bigint,
+  "mime_type" varchar(100),
+  "caption" text,
+  "taken_at" timestamptz,
+  "location" geography,
+  "saved_place_id" uuid,
+  "exif_raw_payload" jsonb,
+  "deleted_at" timestamptz,
+  "purge_at" timestamptz,
+  "created_at" timestamptz NOT NULL
 );
 
 CREATE TABLE "gallery"."media_reaction" (
-                                            "media_id" uuid,
-                                            "user_login_id" uuid,
-                                            "reaction_type" varchar(20) NOT NULL DEFAULT 'heart',
-                                            "created_at" timestamptz NOT NULL,
-                                            PRIMARY KEY ("media_id", "user_login_id")
+  "media_id" uuid,
+  "user_login_id" uuid,
+  "reaction_type" varchar(20) NOT NULL DEFAULT 'heart',
+  "created_at" timestamptz NOT NULL,
+  PRIMARY KEY ("media_id", "user_login_id")
 );
 
 CREATE TABLE "gallery"."media_comment" (
-                                           "id" bigserial PRIMARY KEY,
-                                           "media_id" uuid NOT NULL,
-                                           "user_login_id" uuid NOT NULL,
-                                           "content" text NOT NULL,
-                                           "created_at" timestamptz NOT NULL,
-                                           "deleted_at" timestamptz
+  "id" bigserial PRIMARY KEY,
+  "media_id" uuid NOT NULL,
+  "user_login_id" uuid NOT NULL,
+  "content" text NOT NULL,
+  "created_at" timestamptz NOT NULL,
+  "deleted_at" timestamptz
 );
 
 CREATE TABLE "calendar"."day_entry" (
-                                        "room_id" uuid,
-                                        "entry_date" date NOT NULL,
-                                        "created_by_user_id" uuid,
-                                        "content" text,
-                                        "mood_emoji" varchar(10),
-                                        "created_at" timestamptz NOT NULL,
-                                        PRIMARY KEY ("room_id", "entry_date")
+  "room_id" uuid,
+  "entry_date" date NOT NULL,
+  "created_by_user_id" uuid,
+  "content" text,
+  "mood_emoji" varchar(10),
+  "created_at" timestamptz NOT NULL,
+  PRIMARY KEY ("room_id", "entry_date")
 );
 
 CREATE TABLE "calendar"."day_entry_media" (
-                                              "room_id" uuid,
-                                              "entry_date" date,
-                                              "media_id" uuid,
-                                              "created_at" timestamptz NOT NULL,
-                                              PRIMARY KEY ("room_id", "entry_date", "media_id")
+  "room_id" uuid,
+  "entry_date" date,
+  "media_id" uuid,
+  "created_at" timestamptz NOT NULL,
+  PRIMARY KEY ("room_id", "entry_date", "media_id")
 );
 
 CREATE TABLE "map"."lkp_place_category" (
-                                            "code" varchar(30) PRIMARY KEY,
-                                            "name" varchar(100) NOT NULL,
-                                            "icon_url" varchar(255)
+  "code" varchar(30) PRIMARY KEY,
+  "name" varchar(100) NOT NULL,
+  "icon_url" varchar(255)
 );
 
 CREATE TABLE "map"."saved_place" (
-                                     "id" uuid PRIMARY KEY,
-                                     "room_id" uuid NOT NULL,
-                                     "created_by_user_id" uuid NOT NULL,
-                                     "category_code" varchar(30),
-                                     "name" varchar(150) NOT NULL,
-                                     "description" text,
-                                     "location" geography NOT NULL,
-                                     "is_auto_generated" boolean NOT NULL DEFAULT false,
-                                     "source_media_id" uuid,
-                                     "visited_at" date,
-                                     "created_at" timestamptz NOT NULL
+  "id" uuid PRIMARY KEY,
+  "room_id" uuid NOT NULL,
+  "created_by_user_id" uuid NOT NULL,
+  "category_code" varchar(30),
+  "name" varchar(150) NOT NULL,
+  "description" text,
+  "location" geography NOT NULL,
+  "is_auto_generated" boolean NOT NULL DEFAULT false,
+  "source_media_id" uuid,
+  "visited_at" date,
+  "created_at" timestamptz NOT NULL
 );
 
 CREATE TABLE "map"."location_ping" (
-                                       "id" bigserial PRIMARY KEY,
-                                       "user_login_id" uuid NOT NULL,
-                                       "room_id" uuid NOT NULL,
-                                       "location" geography NOT NULL,
-                                       "battery_level" smallint,
-                                       "recorded_at" timestamptz NOT NULL
+  "id" bigserial PRIMARY KEY,
+  "user_login_id" uuid NOT NULL,
+  "room_id" uuid NOT NULL,
+  "location" geography NOT NULL,
+  "battery_level" smallint,
+  "recorded_at" timestamptz NOT NULL
 );
 
 CREATE TABLE "notification"."lkp_notification_type" (
-                                                        "code" varchar(40) PRIMARY KEY,
-                                                        "name" varchar(100) NOT NULL
+  "code" varchar(40) PRIMARY KEY,
+  "name" varchar(100) NOT NULL
 );
 
 CREATE TABLE "notification"."notification" (
-                                               "id" bigserial PRIMARY KEY,
-                                               "room_id" uuid NOT NULL,
-                                               "recipient_user_id" uuid NOT NULL,
-                                               "actor_user_id" uuid,
-                                               "type_code" varchar(40) NOT NULL,
-                                               "entity_type" varchar(30),
-                                               "entity_id" varchar(64),
-                                               "is_read" boolean NOT NULL DEFAULT false,
-                                               "created_at" timestamptz NOT NULL
+  "id" bigserial PRIMARY KEY,
+  "room_id" uuid NOT NULL,
+  "recipient_user_id" uuid NOT NULL,
+  "actor_user_id" uuid,
+  "type_code" varchar(40) NOT NULL,
+  "entity_type" varchar(30),
+  "entity_id" varchar(64),
+  "is_read" boolean NOT NULL DEFAULT false,
+  "created_at" timestamptz NOT NULL
 );
 
 CREATE UNIQUE INDEX ON "identity"."users_login" ("auth_provider", "provider_user_id");
@@ -298,6 +303,14 @@ Un trigger debe garantizar solo 1 is_primary=true por (user_login_id, contact_ty
 COMMENT ON COLUMN "identity"."user_contact"."user_login_id" IS 'FK real -> identity.profile.user_login_id (mismo schema)';
 
 COMMENT ON COLUMN "identity"."user_contact"."contact_type_code" IS 'FK real -> identity.lkp_contact_type.code (mismo schema)';
+
+COMMENT ON TABLE "identity"."user_role" IS 'Tabla puente N:M entre users_login y lkp_role. Mapea la entidad UserRole y su EmbeddedId UserRoleId.';
+
+COMMENT ON COLUMN "identity"."user_role"."user_login_id" IS 'FK real -> identity.users_login.id';
+
+COMMENT ON COLUMN "identity"."user_role"."role_code" IS 'FK real -> identity.lkp_role.code';
+
+COMMENT ON COLUMN "identity"."user_role"."granted_at" IS 'Fecha de asignación del rol';
 
 COMMENT ON TABLE "billing"."plan" IS 'CODE natural: free, couple_premium, family... max_members permite crecer de 2 a N sin cambiar esquema';
 
@@ -454,6 +467,10 @@ saved_place...) y entity_id su identificador. Se guarda como texto porque
 las tablas referenciadas usan tipos de PK distintos (uuid vs compuesta):
 para day_entry se guarda como "room_id:entry_date" serializado.
 ';
+
+ALTER TABLE "identity"."user_role" ADD FOREIGN KEY ("user_login_id") REFERENCES "identity"."users_login" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+
+ALTER TABLE "identity"."user_role" ADD FOREIGN KEY ("role_code") REFERENCES "identity"."lkp_role" ("code") DEFERRABLE INITIALLY IMMEDIATE;
 
 ALTER TABLE "identity"."users_login" ADD FOREIGN KEY ("status_code") REFERENCES "identity"."lkp_user_status" ("code") DEFERRABLE INITIALLY IMMEDIATE;
 

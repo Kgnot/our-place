@@ -2,6 +2,7 @@ package org.our_place.identity.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -21,7 +22,7 @@ public class Profile {
     private UUID userLoginId;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @MapsId
+    @MapsId // Le dice a Hibernate que use el mismo ID de UsersLogin
     @JoinColumn(name = "user_login_id")
     private UsersLogin usersLogin;
 
@@ -44,5 +45,6 @@ public class Profile {
     private String locale = "es-CO";
 
     @Column(name = "created_at", nullable = false)
+    @CreationTimestamp
     private OffsetDateTime createdAt;
 }

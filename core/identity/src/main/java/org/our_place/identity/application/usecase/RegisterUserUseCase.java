@@ -30,7 +30,7 @@ public class RegisterUserUseCase implements UseCase<RegisterUserCommand, Registe
     private static final String PROVIDER_LOCAL = "local";
 
     private final UsersLoginRepository usersLoginRepository;
-    private final ProfileRepository profileRepository; // Added to persist Profile explicitly
+    private final ProfileRepository profileRepository;
     private final LkpUserStatusRepository lkpUserStatusRepository;
     private final PasswordEncoder passwordEncoder;
     private final EventBus eventBus;
