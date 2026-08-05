@@ -53,10 +53,10 @@ public class RegisterUserUseCase implements UseCase<RegisterUserCommand, Registe
         );
 
         //persist user
-        usersLoginRepository.save(usersLogin);
+        var userRegistry = usersLoginRepository.save(usersLogin);
 
         Profile profile = new Profile();
-        profile.setUsersLogin(usersLogin);
+        profile.setUsersLogin(userRegistry);
         profile.setFirstName(command.firstName());
         profile.setLastName(command.lastName());
         profile.setCreatedAt(OffsetDateTime.now(clock));

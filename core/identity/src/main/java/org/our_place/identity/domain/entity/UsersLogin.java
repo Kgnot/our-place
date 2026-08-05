@@ -20,7 +20,6 @@ import java.util.UUID;
 )
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 public class UsersLogin {
 
     private static final short MAX_FAILED_ATTEMPTS = 5;
@@ -28,6 +27,9 @@ public class UsersLogin {
     @Id
     @Column(name = "id", nullable = false)
     private UUID id;
+
+    @Transient
+    private boolean isNew = false;
 
     @Column(name = "email", length = 255, nullable = false, unique = true)
     private String email;
@@ -91,6 +93,7 @@ public class UsersLogin {
         UsersLogin user = new UsersLogin();
         user.id = UUID.randomUUID();
         user.email = email.value();
+        user.isNew = true;
         user.passwordHash = passwordHash;
         user.authProvider = (authProvider != null) ? authProvider : "local";
         user.status = initialStatus;
@@ -130,5 +133,12 @@ public class UsersLogin {
 
     public void changeStatus(LkpUserStatus newStatus) {
         this.status = newStatus;
+    }
+
+    // para persistencia
+    @PostPersist
+    @PostLoad
+    void markNotNew() {
+        this.isNew = false;
     }
 }
