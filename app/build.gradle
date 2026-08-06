@@ -8,8 +8,15 @@ description = 'Main Application - Entry point for the Our Place backend services
 dependencies {
     // propias
     implementation project(':core:common')
-    implementation project(':core:identity')
+    implementation project(':core:affection')
     implementation project(':core:billing')
+    implementation project(':core:calendar')
+    implementation project(':core:gallery')
+    implementation project(':core:identity')
+    implementation project(':core:map')
+    implementation project(':core:notification')
+    implementation project(':core:pet')
+    implementation project(':core:room')
     implementation project(':shared')
     // Lo específico de emitir/validar JWT — SOLO identity lo necesita
     implementation libs.jjwt.api

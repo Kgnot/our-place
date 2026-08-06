@@ -5,13 +5,15 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Aspect
 @Component
-public class UseCaseLoggingAspect {
+@Qualifier("affection")
+public class AffectionUseCaseLoggingAspect {
 
-    private static final Logger log = LoggerFactory.getLogger(UseCaseLoggingAspect.class);
+    private static final Logger log = LoggerFactory.getLogger(AffectionUseCaseLoggingAspect.class);
 
     @Around("execution(* org.our_place.affection.usecase.*UseCase.execute(..))")
     public Object logUseCaseExecution(ProceedingJoinPoint joinPoint) throws Throwable {

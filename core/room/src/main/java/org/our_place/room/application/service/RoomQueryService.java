@@ -1,6 +1,8 @@
 package org.our_place.room.application.service;
 
 import lombok.RequiredArgsConstructor;
+import org.our_place.room.application.service.dto.UserRoomDto;
+import org.our_place.room.application.service.mapper.RoomMapper;
 import org.our_place.room.domain.exception.RoomNotFoundException;
 import org.our_place.room.domain.entity.RoomMember;
 import org.our_place.room.domain.entity.Rooms;
@@ -14,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
-/** Solo lectura — proyecta a DTO, no muta estado (ver §2). */
+/** Solo lectura — proyecta a DTO, no muta estado. */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -26,7 +28,7 @@ public class RoomQueryService {
     public RoomDto getRoomDetail(UUID roomId) {
         Rooms room = roomsRepository.findById(roomId)
                 .orElseThrow(() -> new RoomNotFoundException(roomId));
-        return toDto(room);
+        return RoomMapper.toDto(room);
     }
 
     public List<RoomMemberDto> listMembers(UUID roomId) {
@@ -34,30 +36,21 @@ public class RoomQueryService {
             throw new RoomNotFoundException(roomId);
         }
         return roomMemberRepository.findByIdRoomId(roomId).stream()
-                .map(this::toDto)
+                .map(RoomMapper::toDto)
                 .toList();
     }
 
-    private RoomDto toDto(Rooms room) {
-        return new RoomDto(
-                room.getId(),
-                room.getName(),
-                room.getStatus().getCode(),
-                room.getRelationshipType() != null ? room.getRelationshipType().getCode() : null,
-                room.getOwnerUserId(),
-                room.getAnniversaryDate(),
-                room.getTimezone(),
-                room.getCreatedAt()
-        );
+    public List<UserRoomDto> listRoomsForUser(UUID userLoginId) {
+        return roomMemberRepository.findByIdUserLoginId(userLoginId).stream()
+                .map(RoomMapper::toUserRoomDto)
+                .toList();
     }
 
-    private RoomMemberDto toDto(RoomMember member) {
-        return new RoomMemberDto(
-                member.getId().getUserLoginId(),
-                member.getRoleCode(),
-                member.getStatus(),
-                member.getNickname(),
-                member.getJoinedAt()
-        );
+    public List<UserRoomDto> listActiveRoomsForUser(UUID userLoginId) {
+        return roomMemberRepository.findByIdUserLoginIdAndStatus(userLoginId, "active").stream()
+                .map(RoomMapper::toUserRoomDto)
+                .toList();
     }
+
+
 }

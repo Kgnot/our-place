@@ -69,7 +69,7 @@ configure(subprojects.findAll { it.name in
             implementation libs.spring.boot.starter.cache
             implementation libs.caffeine
 
-            implementation libs.springdoc.openapi
+//            implementation libs.springdoc.openapi // para usar, toca degree de springboot a 3.5.x
             implementation libs.commons.lang3
 
             compileOnly libs.lombok

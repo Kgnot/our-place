@@ -9,6 +9,10 @@ import java.util.UUID;
 @Entity
 @Table(name = "room_member", schema = "room")
 @Getter
+@NamedEntityGraph(
+        name = "RoomMember.withRoom",
+        attributeNodes = @NamedAttributeNode("room")
+)
 @NoArgsConstructor
 public class RoomMember {
 

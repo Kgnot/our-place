@@ -25,6 +25,7 @@ import org.our_place.room.application.usecase.command.SetMemberRelationshipComma
 import org.our_place.room.application.usecase.command.UpdateNicknameCommand;
 import org.our_place.room.application.usecase.output.CreateRoomOutput;
 import org.our_place.room.application.usecase.output.InviteMemberOutput;
+import org.our_place.room.infra.controller.response.UserRoomResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,7 +39,7 @@ import java.util.UUID;
  * puede suplantar a otro usuario. El recurso sobre el que se actúa (roomId) va en la ruta.
  */
 @RestController
-@RequestMapping("/rooms")
+@RequestMapping("api/v1/rooms")
 @RequiredArgsConstructor
 public class RoomController {
 
@@ -116,5 +117,14 @@ public class RoomController {
                 request.relationshipTypeCode(), request.sinceDate()
         ));
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @GetMapping("/mine")
+    public ResponseEntity<List<UserRoomResponse>> listMyRooms() {
+        UUID userLoginId = securityContextApi.getCurrentUserId();
+        List<UserRoomResponse> rooms = roomQueryService.listActiveRoomsForUser(userLoginId).stream()
+                .map(UserRoomResponse::from)
+                .toList();
+        return ResponseEntity.ok(rooms);
     }
 }

@@ -4,12 +4,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Aspect
 @Component
 @Slf4j
-public class UseCaseLoggingAspect {
+@Qualifier("identity")
+public class IdentityUseCaseLoggingAspect {
 
     @Around("execution(* org.our_place..usecase..*UseCase.execute(..)) && args(command)")
     public Object logUseCase(ProceedingJoinPoint pjp, Object command) throws Throwable {

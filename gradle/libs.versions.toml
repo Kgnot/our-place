@@ -1,7 +1,8 @@
 [versions]
-springBoot = "4.1.0"
+springBoot = "3.5.3"
 springDependencyManagement = "1.1.7"
-springCloud = "2025.1.2"
+#springCloud = "2025.1.2"
+springCloud = "2025.0.3"   # ← Para Spring Boot 3.5.x
 
 awsSdkBom = "2.24.0"
 thumbnailator = "0.4.20"

@@ -1,13 +1,14 @@
 package org.our_place.common.shared.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
+//import org.jspecify.annotations.NonNull; // spring 4.x
 import org.our_place.common.shared.SharedApi;
 import org.our_place.common.shared.SharedDomain;
 import org.our_place.common.shared.dto.SharedItemDto;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ClassUtils;
 
