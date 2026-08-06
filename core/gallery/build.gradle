@@ -9,4 +9,6 @@ description = 'Gallery Service - manage read operation to the gallery (images, v
 dependencies {
     // Módulo transversal (JwtAuthenticationFilter, PublicEndpoints, AuthenticatedUser, etc.)
     implementation project(':core:common')
+    implementation project(':core:identity')
+    implementation project(':shared')
 }

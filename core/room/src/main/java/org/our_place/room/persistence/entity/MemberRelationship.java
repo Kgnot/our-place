@@ -1,4 +1,4 @@
-package org.our_place.notification.persistence.entity;
+package org.our_place.room.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -6,17 +6,10 @@ import lombok.*;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
-/**
- * COMPUESTA: la fila ES "estos dos miembros de esta sala tienen esta relación".
- * Solo relevante al escalar a N miembros; para pareja (2 personas) usar
- * Rooms.relationshipType / Rooms.anniversaryDate y dejar esta tabla vacía.
- */
 @Entity
 @Table(name = "member_relationship", schema = "room")
 @Getter
-@Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class MemberRelationship {
 
     @EmbeddedId
@@ -36,4 +29,15 @@ public class MemberRelationship {
 
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
+
+    public static MemberRelationship create(Rooms room, java.util.UUID memberAUserId, java.util.UUID memberBUserId,
+                                            LkpRelationshipType type, LocalDate sinceDate) {
+        MemberRelationship rel = new MemberRelationship();
+        rel.id = new MemberRelationshipId(room.getId(), memberAUserId, memberBUserId);
+        rel.room = room;
+        rel.relationshipType = type;
+        rel.sinceDate = sinceDate;
+        rel.createdAt = OffsetDateTime.now();
+        return rel;
+    }
 }

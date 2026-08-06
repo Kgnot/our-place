@@ -1,4 +1,4 @@
-package org.our_place.notification.persistence.entity;
+package org.our_place.room.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -8,17 +8,14 @@ import java.util.UUID;
 
 @Entity
 @Table(
-    name = "room_invitation",
-    schema = "room",
-    indexes = @Index(name = "idx_room_invitation_lookup", columnList = "room_id, invited_email, status")
+        name = "room_invitation",
+        schema = "room",
+        indexes = @Index(name = "idx_room_invitation_lookup", columnList = "room_id, invited_email, status")
 )
 @Getter
-@Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class RoomInvitation {
 
-    /** BIGSERIAL: id interno de sistema; el identificador público real es `token`. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -31,11 +28,9 @@ public class RoomInvitation {
     @Column(name = "invited_email", length = 255, nullable = false)
     private String invitedEmail;
 
-    /** Sin FK real: referencia lógica cross-schema a identity.users_login.id. */
     @Column(name = "invited_by_user_id", nullable = false)
     private UUID invitedByUserId;
 
-    /** Sin FK real: referencia lógica cross-schema a identity.lkp_role.code. */
     @Column(name = "role_code", length = 30, nullable = false)
     private String roleCode;
 
@@ -53,4 +48,25 @@ public class RoomInvitation {
 
     @Column(name = "accepted_at")
     private OffsetDateTime acceptedAt;
+
+    public static RoomInvitation create(Rooms room, String invitedEmail, UUID invitedByUserId, String roleCode) {
+        RoomInvitation inv = new RoomInvitation();
+        inv.room = room;
+        inv.invitedEmail = invitedEmail;
+        inv.invitedByUserId = invitedByUserId;
+        inv.roleCode = roleCode;
+        inv.token = UUID.randomUUID().toString();
+        inv.expiresAt = OffsetDateTime.now().plusDays(7);
+        inv.createdAt = OffsetDateTime.now();
+        return inv;
+    }
+
+    public void accept() {
+        this.status = "accepted";
+        this.acceptedAt = OffsetDateTime.now();
+    }
+
+    public boolean isExpired() {
+        return OffsetDateTime.now().isAfter(this.expiresAt);
+    }
 }

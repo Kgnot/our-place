@@ -1,4 +1,4 @@
-package org.our_place.notification.persistence.entity;
+package org.our_place.room.persistence.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

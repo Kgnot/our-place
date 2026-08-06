@@ -1,4 +1,4 @@
-package org.our_place.notification.persistence.entity;
+package org.our_place.room.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,9 +9,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "room_member", schema = "room")
 @Getter
-@Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class RoomMember {
 
     @EmbeddedId
@@ -23,13 +21,13 @@ public class RoomMember {
     private Rooms room;
 
     @Column(name = "role_code", nullable = false, length = 30)
-    private String roleCode; // SIN FK cross-schema -> identity.lkp_role.code
+    private String roleCode;
 
     @Column(name = "status", nullable = false, length = 20)
     private String status = "active";
 
     @Column(name = "invited_by_user_id")
-    private UUID invitedByUserId; // SIN FK cross-schema -> identity.users_login.id
+    private UUID invitedByUserId;
 
     @Column(name = "nickname", length = 50)
     private String nickname;
@@ -47,12 +45,7 @@ public class RoomMember {
         return member;
     }
 
-    // El "extra" de personalización que pediste: el apodo es propio de este miembro en ESTA sala
-    public void updateNickname(String nickname) {
-        this.nickname = nickname;
-    }
+    public void updateNickname(String nickname) { this.nickname = nickname; }
 
-    public void leave() {
-        this.status = "left";
-    }
+    public void leave() { this.status = "left"; }
 }
