@@ -1,0 +1,9 @@
+package org.our_place.room.infra.controller.request;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public record UpdateNicknameRequest(
+        @NotBlank @Size(max = 50) String nickname
+) {
+}

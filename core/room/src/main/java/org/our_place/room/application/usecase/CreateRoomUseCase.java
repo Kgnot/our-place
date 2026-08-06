@@ -15,7 +15,7 @@ import org.our_place.room.infra.persistence.repository.LkpRelationshipTypeReposi
 import org.our_place.room.infra.persistence.repository.LkpRoomStatusRepository;
 import org.our_place.room.infra.persistence.repository.RoomMemberRepository;
 import org.our_place.room.infra.persistence.repository.RoomsRepository;
-import org.springframework.context.ApplicationEventPublisher;
+import org.our_place.shared.application.bus.EventBus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +29,7 @@ public class CreateRoomUseCase implements UseCase<CreateRoomCommand, CreateRoomO
     private final RoomMemberRepository roomMemberRepository;
     private final LkpRoomStatusRepository roomStatusRepository;
     private final LkpRelationshipTypeRepository relationshipTypeRepository;
-    private final ApplicationEventPublisher eventPublisher;
+    private final EventBus eventPublisher;
 
     @Override
     public CreateRoomOutput execute(CreateRoomCommand command) {
@@ -56,7 +56,7 @@ public class CreateRoomUseCase implements UseCase<CreateRoomCommand, CreateRoomO
         RoomMember owner = RoomMember.join(room, command.ownerUserId(), RoomRole.OWNER.code(), null);
         roomMemberRepository.save(owner);
 
-        eventPublisher.publishEvent(new RoomCreatedEvent(room.getId(), room.getOwnerUserId(), command.relationshipTypeCode()));
+        eventPublisher.publish(new RoomCreatedEvent(room.getId(), room.getOwnerUserId(), command.relationshipTypeCode()));
 
         return new CreateRoomOutput(room.getId());
     }
