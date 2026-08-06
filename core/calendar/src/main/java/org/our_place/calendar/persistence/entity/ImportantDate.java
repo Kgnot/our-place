@@ -1,6 +1,5 @@
 package org.our_place.calendar.persistence.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.domain.Persistable;
@@ -20,11 +19,10 @@ public class ImportantDate implements Persistable<UUID> {
     private UUID id;
 
     @Column(name = "room_id", nullable = false)
-    private UUID roomId; // SIN FK cross-schema -> room.rooms.id
+    private UUID roomId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "type_code", referencedColumnName = "code", nullable = false)
-    @JsonManagedReference
     private LkpImportantDateType type;
 
     @Column(name = "title", length = 150, nullable = false)
@@ -66,13 +64,9 @@ public class ImportantDate implements Persistable<UUID> {
     }
 
     @Override
-    public boolean isNew() {
-        return isNew;
-    }
+    public boolean isNew() { return isNew; }
 
     @PostPersist
     @PostLoad
-    void markNotNew() {
-        this.isNew = false;
-    }
+    void markNotNew() { this.isNew = false; }
 }

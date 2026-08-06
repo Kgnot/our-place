@@ -3,20 +3,14 @@ package org.our_place.calendar.persistence.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
-/**
- * COMPUESTA: puente N:N puro entre calendar.day_entry y gallery.media.
- * (room_id, entry_date) es FK compuesta real hacia calendar.day_entry, definida
- * a nivel de base de datos; no se modela como @ManyToOne aquí porque el id
- * embebido combina esa pareja con un tercer campo (media_id) de otro schema.
- */
 @Entity
 @Table(name = "day_entry_media", schema = "calendar")
 @Getter
-@Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class DayEntryMedia {
 
     @EmbeddedId
@@ -24,4 +18,11 @@ public class DayEntryMedia {
 
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
+
+    public static DayEntryMedia create(UUID roomId, LocalDate entryDate, UUID mediaId) {
+        DayEntryMedia link = new DayEntryMedia();
+        link.id = new DayEntryMediaId(roomId, entryDate, mediaId);
+        link.createdAt = OffsetDateTime.now();
+        return link;
+    }
 }

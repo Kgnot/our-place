@@ -6,19 +6,15 @@ import lombok.*;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-/** content nullable: la entrada puede ser solo fotos vinculadas, solo texto, o ambos. */
 @Entity
 @Table(name = "day_entry", schema = "calendar")
 @Getter
-@Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class DayEntry {
 
     @EmbeddedId
     private DayEntryId id;
 
-    /** Sin FK real: referencia lógica cross-schema a identity.users_login.id. */
     @Column(name = "created_by_user_id")
     private UUID createdByUserId;
 
@@ -30,4 +26,20 @@ public class DayEntry {
 
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
+
+    public static DayEntry create(UUID roomId, java.time.LocalDate entryDate,
+                                  UUID createdByUserId, String content, String moodEmoji) {
+        DayEntry entry = new DayEntry();
+        entry.id = new DayEntryId(roomId, entryDate);
+        entry.createdByUserId = createdByUserId;
+        entry.content = content;
+        entry.moodEmoji = moodEmoji;
+        entry.createdAt = OffsetDateTime.now();
+        return entry;
+    }
+
+    public void updateContent(String content, String moodEmoji) {
+        this.content = content;
+        this.moodEmoji = moodEmoji;
+    }
 }

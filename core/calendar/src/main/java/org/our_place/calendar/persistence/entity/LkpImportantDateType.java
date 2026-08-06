@@ -1,9 +1,6 @@
 package org.our_place.calendar.persistence.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.Getter;
-import java.util.List;
 import lombok.*;
 
 @Entity
@@ -13,14 +10,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LkpImportantDateType {
+
     @Id
-    @Column(name = "code")
+    @Column(name = "code", length = 30, nullable = false)
     private String code;
 
-    @Column(name = "name")
+    @Column(name = "name", length = 100, nullable = false)
     private String name;
-
-    @OneToMany(mappedBy = "type")
-    @JsonBackReference
-    private List<ImportantDate> importantDates;
 }
