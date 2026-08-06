@@ -2,37 +2,28 @@ package org.our_place.gallery.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.domain.Persistable;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(
-    name = "media_comment",
-    schema = "gallery",
-    indexes = @Index(name = "idx_media_comment_media_created", columnList = "media_id, created_at")
-)
+@Table(name = "media_comment", schema = "gallery")
 @Getter
-@Setter
 @NoArgsConstructor
-@AllArgsConstructor
-public class MediaComment {
+public class MediaComment implements Persistable<UUID> {
 
-    /** BIGSERIAL: alto volumen, orden de inserción importa, no se expone por URL propia. */
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private Long id;
+    private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "media_id", nullable = false)
-    private Media media;
+    @Column(name = "media_id", nullable = false)
+    private UUID mediaId;
 
-    /** Sin FK real: referencia lógica cross-schema a identity.users_login.id. */
     @Column(name = "user_login_id", nullable = false)
     private UUID userLoginId;
 
-    @Column(name = "content", nullable = false, columnDefinition = "text")
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @Column(name = "created_at", nullable = false)
@@ -40,4 +31,33 @@ public class MediaComment {
 
     @Column(name = "deleted_at")
     private OffsetDateTime deletedAt;
+
+    @Transient
+    private boolean isNew = false;
+
+    public static MediaComment create(UUID mediaId, UUID userLoginId, String content) {
+        MediaComment comment = new MediaComment();
+        comment.id = UUID.randomUUID();
+        comment.isNew = true;
+        comment.mediaId = mediaId;
+        comment.userLoginId = userLoginId;
+        comment.content = content;
+        comment.createdAt = OffsetDateTime.now();
+        return comment;
+    }
+
+    public void softDelete() {
+        this.deletedAt = OffsetDateTime.now();
+    }
+
+    @Override
+    public boolean isNew() {
+        return isNew;
+    }
+
+    @PostPersist
+    @PostLoad
+    void markNotNew() {
+        this.isNew = false;
+    }
 }

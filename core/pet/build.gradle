@@ -1,0 +1,14 @@
+plugins {
+    id 'java'
+    alias(libs.plugins.springBoot)
+    alias(libs.plugins.springDependencyManagement)
+}
+
+description = 'Pet Service - Implementation of the pet management module'
+
+
+dependencies {
+    // Módulo transversal (JwtAuthenticationFilter, PublicEndpoints, AuthenticatedUser, etc.)
+    implementation project(':core:common')
+
+}

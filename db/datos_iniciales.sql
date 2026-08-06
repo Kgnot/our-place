@@ -105,3 +105,33 @@ INSERT INTO "notification"."lkp_notification_type" ("code", "name") VALUES
                                                                         ('storage_quota_alert',  'Alerta de cuota de almacenamiento'),
                                                                         ('member_joined',        'Nuevo miembro en el espacio'),
                                                                         ('anniversary_reminder', 'Recordatorio de aniversario');
+-- ---------------------------------------------------------------------
+-- pet.lkp_species
+-- ---------------------------------------------------------------------
+INSERT INTO "pet"."lkp_species" ("code", "name") VALUES
+                                                     ('dog',    'Perro'),
+                                                     ('cat',    'Gato'),
+                                                     ('bird',   'Ave'),
+                                                     ('rabbit', 'Conejo'),
+                                                     ('fish',   'Pez'),
+                                                     ('other',  'Otro');
+
+-- ---------------------------------------------------------------------
+-- calendar.lkp_important_date_type
+-- ---------------------------------------------------------------------
+INSERT INTO "calendar"."lkp_important_date_type" ("code", "name") VALUES
+                                                                      ('anniversary',   'Aniversario'),
+                                                                      ('birthday',       'Cumpleaños'),
+                                                                      ('first_date',     'Primera cita'),
+                                                                      ('engagement',      'Compromiso'),
+                                                                      ('wedding',          'Matrimonio'),
+                                                                      ('custom_event',      'Evento personalizado');
+
+-- ---------------------------------------------------------------------
+-- affection.lkp_note_type
+-- ---------------------------------------------------------------------
+INSERT INTO "affection"."lkp_note_type" ("code", "name") VALUES
+                                                             ('love_note',    'Nota de amor'),
+                                                             ('memory',        'Recuerdo'),
+                                                             ('appreciation',   'Agradecimiento'),
+                                                             ('encouragement',  'Palabras de ánimo');

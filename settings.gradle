@@ -14,5 +14,7 @@ include 'core:common'
 include 'core:billing'
 include 'core:gallery'
 include 'core:room'
+include 'core:pet'
+include 'core:affection'
 //shared
 include 'shared'

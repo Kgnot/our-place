@@ -22,20 +22,37 @@ public class RoomMember {
     @JoinColumn(name = "room_id")
     private Rooms room;
 
-    /** Sin FK real: referencia lógica cross-schema a identity.lkp_role.code. */
-    @Column(name = "role_code", length = 30, nullable = false)
-    private String roleCode;
+    @Column(name = "role_code", nullable = false, length = 30)
+    private String roleCode; // SIN FK cross-schema -> identity.lkp_role.code
 
-    @Column(name = "status", length = 20, nullable = false)
+    @Column(name = "status", nullable = false, length = 20)
     private String status = "active";
 
-    /** Sin FK real: referencia lógica cross-schema a identity.users_login.id. */
     @Column(name = "invited_by_user_id")
-    private UUID invitedByUserId;
+    private UUID invitedByUserId; // SIN FK cross-schema -> identity.users_login.id
 
     @Column(name = "nickname", length = 50)
     private String nickname;
 
     @Column(name = "joined_at", nullable = false)
     private OffsetDateTime joinedAt;
+
+    public static RoomMember join(Rooms room, UUID userLoginId, String roleCode, UUID invitedByUserId) {
+        RoomMember member = new RoomMember();
+        member.id = new RoomMemberId(room.getId(), userLoginId);
+        member.room = room;
+        member.roleCode = roleCode;
+        member.invitedByUserId = invitedByUserId;
+        member.joinedAt = OffsetDateTime.now();
+        return member;
+    }
+
+    // El "extra" de personalización que pediste: el apodo es propio de este miembro en ESTA sala
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void leave() {
+        this.status = "left";
+    }
 }

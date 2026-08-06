@@ -1,0 +1,20 @@
+plugins {
+    id 'java'
+    alias(libs.plugins.springBoot)
+    alias(libs.plugins.springDependencyManagement)
+}
+
+description = 'Affection Service - Manages affection-related data and operations'
+
+dependencies {
+    implementation project(':core:common')
+    implementation project(':core:identity')
+    implementation project(':shared')
+    // REST API support
+    implementation libs.spring.boot.starter.data.rest
+}
+
+
+jar {
+    enabled = false
+}

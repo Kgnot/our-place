@@ -5,6 +5,8 @@ DROP SCHEMA IF EXISTS "gallery" CASCADE;
 DROP SCHEMA IF EXISTS "calendar" CASCADE;
 DROP SCHEMA IF EXISTS "map" CASCADE;
 DROP SCHEMA IF EXISTS "notification" CASCADE;
+drop schema if exists "pet" cascade;
+drop schema if exists "affection" cascade ;
 
 CREATE SCHEMA "identity";
 
@@ -19,6 +21,10 @@ CREATE SCHEMA "calendar";
 CREATE SCHEMA "map";
 
 CREATE SCHEMA "notification";
+
+CREATE SCHEMA "pet";
+
+CREATE SCHEMA "affection";
 
 CREATE TABLE "identity"."lkp_user_status" (
                                               "code" varchar(30) PRIMARY KEY,
@@ -195,12 +201,29 @@ CREATE TABLE "gallery"."media_reaction" (
 );
 
 CREATE TABLE "gallery"."media_comment" (
-                                           "id" bigserial PRIMARY KEY,
+                                           "id" uuid PRIMARY KEY,
                                            "media_id" uuid NOT NULL,
                                            "user_login_id" uuid NOT NULL,
                                            "content" text NOT NULL,
                                            "created_at" timestamptz NOT NULL,
                                            "deleted_at" timestamptz
+);
+
+CREATE TABLE "calendar"."lkp_important_date_type" (
+                                                      "code" varchar(30) PRIMARY KEY,
+                                                      "name" varchar(100) NOT NULL
+);
+
+CREATE TABLE "calendar"."important_date" (
+                                             "id" uuid PRIMARY KEY,
+                                             "room_id" uuid NOT NULL,
+                                             "type_code" varchar(30) NOT NULL,
+                                             "title" varchar(150) NOT NULL,
+                                             "event_date" date NOT NULL,
+                                             "is_recurring" boolean NOT NULL DEFAULT true,
+                                             "notify_days_before" smallint NOT NULL DEFAULT 0,
+                                             "created_by_user_id" uuid NOT NULL,
+                                             "created_at" timestamptz NOT NULL
 );
 
 CREATE TABLE "calendar"."day_entry" (
@@ -267,6 +290,37 @@ CREATE TABLE "notification"."notification" (
                                                "created_at" timestamptz NOT NULL
 );
 
+CREATE TABLE "pet"."lkp_species" (
+                                     "code" varchar(20) PRIMARY KEY,
+                                     "name" varchar(50) NOT NULL
+);
+
+CREATE TABLE "pet"."pets" (
+                              "id" uuid PRIMARY KEY,
+                              "room_id" uuid NOT NULL,
+                              "species_code" varchar(20) NOT NULL,
+                              "name" varchar(100) NOT NULL,
+                              "breed" varchar(100),
+                              "birth_date" date,
+                              "avatar_url" varchar(500),
+                              "created_by_user_id" uuid NOT NULL,
+                              "created_at" timestamptz NOT NULL
+);
+
+CREATE TABLE "affection"."lkp_note_type" (
+                                             "code" varchar(20) PRIMARY KEY,
+                                             "name" varchar(50) NOT NULL
+);
+
+CREATE TABLE "affection"."love_note" (
+                                         "id" uuid PRIMARY KEY,
+                                         "room_id" uuid NOT NULL,
+                                         "author_user_id" uuid NOT NULL,
+                                         "type_code" varchar(20) NOT NULL,
+                                         "content" text NOT NULL,
+                                         "created_at" timestamptz NOT NULL
+);
+
 CREATE UNIQUE INDEX ON "identity"."users_login" ("auth_provider", "provider_user_id");
 
 CREATE INDEX ON "room"."room_invitation" ("room_id", "invited_email", "status");
@@ -279,11 +333,17 @@ CREATE INDEX ON "gallery"."media" ("room_id", "deleted_at");
 
 CREATE INDEX ON "gallery"."media_comment" ("media_id", "created_at");
 
+CREATE INDEX ON "calendar"."important_date" ("room_id", "event_date");
+
 CREATE INDEX ON "map"."location_ping" ("room_id", "recorded_at");
 
 CREATE INDEX ON "map"."location_ping" ("user_login_id", "recorded_at");
 
 CREATE INDEX ON "notification"."notification" ("recipient_user_id", "is_read", "created_at");
+
+CREATE INDEX ON "pet"."pets" ("room_id");
+
+CREATE INDEX ON "affection"."love_note" ("room_id", "created_at");
 
 COMMENT ON TABLE "identity"."lkp_user_status" IS 'CODE natural: active, pending_verification, disabled, locked';
 
@@ -411,11 +471,28 @@ COMMENT ON COLUMN "gallery"."media_reaction"."media_id" IS 'FK real -> gallery.m
 
 COMMENT ON COLUMN "gallery"."media_reaction"."user_login_id" IS 'SIN FK (cross-schema) -> identity.users_login.id.';
 
-COMMENT ON COLUMN "gallery"."media_comment"."id" IS 'BIGSERIAL: alto volumen, orden de inserción importa para mostrar el hilo, no se comparte por URL propia';
+COMMENT ON TABLE "gallery"."media_comment" IS 'El orden del hilo se resuelve con el índice (media_id, created_at), no con el id.';
+
+COMMENT ON COLUMN "gallery"."media_comment"."id" IS 'UUID: texto privado escrito dentro de una sala — mismo criterio que affection.love_note y gallery.media, evita enumeración';
 
 COMMENT ON COLUMN "gallery"."media_comment"."media_id" IS 'FK real -> gallery.media.id (mismo schema)';
 
 COMMENT ON COLUMN "gallery"."media_comment"."user_login_id" IS 'SIN FK (cross-schema) -> identity.users_login.id.';
+
+COMMENT ON TABLE "calendar"."lkp_important_date_type" IS 'CODE natural: anniversary, birthday, custom_event';
+
+COMMENT ON TABLE "calendar"."important_date" IS 'is_recurring=true: se ignora el año de event_date al calcular la próxima ocurrencia
+(ej: cumpleaños). is_recurring=false: fecha única (ej: "nuestra primera cita fue aquí,
+no se repite cada año como recordatorio").
+';
+
+COMMENT ON COLUMN "calendar"."important_date"."id" IS 'UUID: puede ser referenciado desde notification.entity_id como evento polimórfico';
+
+COMMENT ON COLUMN "calendar"."important_date"."room_id" IS 'SIN FK (cross-schema) -> room.rooms.id.';
+
+COMMENT ON COLUMN "calendar"."important_date"."type_code" IS 'FK real -> calendar.lkp_important_date_type.code (mismo schema)';
+
+COMMENT ON COLUMN "calendar"."important_date"."created_by_user_id" IS 'SIN FK (cross-schema) -> identity.users_login.id.';
 
 COMMENT ON TABLE "calendar"."day_entry" IS 'COMPUESTA (llave de negocio natural): una sala tiene como máximo
 una entrada por fecha. content nullable: puede ser solo fotos vinculadas,
@@ -476,9 +553,37 @@ las tablas referenciadas usan tipos de PK distintos (uuid vs compuesta):
 para day_entry se guarda como "room_id:entry_date" serializado.
 ';
 
+COMMENT ON TABLE "pet"."lkp_species" IS 'CODE natural: dog, cat, bird, rabbit, other';
+
+COMMENT ON TABLE "pet"."pets" IS 'Mascota compartida de la sala. avatar_url separado de gallery.media a propósito: es la foto de perfil, no contenido del álbum.';
+
+COMMENT ON COLUMN "pet"."pets"."id" IS 'UUID: dato privado de la sala — evita enumeración de mascotas de otras salas si hay bug de autorización';
+
+COMMENT ON COLUMN "pet"."pets"."room_id" IS 'SIN FK (cross-schema) -> room.rooms.id. Desacople room<->pet.';
+
+COMMENT ON COLUMN "pet"."pets"."species_code" IS 'FK real -> pet.lkp_species.code (mismo schema)';
+
+COMMENT ON COLUMN "pet"."pets"."created_by_user_id" IS 'SIN FK (cross-schema) -> identity.users_login.id.';
+
+COMMENT ON TABLE "affection"."lkp_note_type" IS 'CODE natural: love_note, memory, appreciation';
+
+COMMENT ON TABLE "affection"."love_note" IS 'El orden del feed se resuelve con el índice (room_id, created_at), no con el id — el id ya no es secuencial.';
+
+COMMENT ON COLUMN "affection"."love_note"."id" IS 'UUID: contenido íntimo/privado entre miembros de la sala — mismo criterio que gallery.media, evita enumeración';
+
+COMMENT ON COLUMN "affection"."love_note"."room_id" IS 'SIN FK (cross-schema) -> room.rooms.id.';
+
+COMMENT ON COLUMN "affection"."love_note"."author_user_id" IS 'SIN FK (cross-schema) -> identity.users_login.id.';
+
+COMMENT ON COLUMN "affection"."love_note"."type_code" IS 'FK real -> affection.lkp_note_type.code (mismo schema)';
+
 ALTER TABLE "identity"."user_role" ADD FOREIGN KEY ("user_login_id") REFERENCES "identity"."users_login" ("id") DEFERRABLE INITIALLY IMMEDIATE;
 
 ALTER TABLE "identity"."user_role" ADD FOREIGN KEY ("role_code") REFERENCES "identity"."lkp_role" ("code") DEFERRABLE INITIALLY IMMEDIATE;
+
+ALTER TABLE "pet"."pets" ADD FOREIGN KEY ("species_code") REFERENCES "pet"."lkp_species" ("code") DEFERRABLE INITIALLY IMMEDIATE;
+
+ALTER TABLE "affection"."love_note" ADD FOREIGN KEY ("type_code") REFERENCES "affection"."lkp_note_type" ("code") DEFERRABLE INITIALLY IMMEDIATE;
 
 ALTER TABLE "identity"."users_login" ADD FOREIGN KEY ("status_code") REFERENCES "identity"."lkp_user_status" ("code") DEFERRABLE INITIALLY IMMEDIATE;
 
@@ -511,6 +616,8 @@ ALTER TABLE "gallery"."media_reaction" ADD FOREIGN KEY ("media_id") REFERENCES "
 ALTER TABLE "gallery"."media_comment" ADD FOREIGN KEY ("media_id") REFERENCES "gallery"."media" ("id") DEFERRABLE INITIALLY IMMEDIATE;
 
 ALTER TABLE "calendar"."day_entry_media" ADD FOREIGN KEY ("room_id", "entry_date") REFERENCES "calendar"."day_entry" ("room_id", "entry_date") DEFERRABLE INITIALLY IMMEDIATE;
+
+ALTER TABLE "calendar"."important_date" ADD FOREIGN KEY ("type_code") REFERENCES "calendar"."lkp_important_date_type" ("code") DEFERRABLE INITIALLY IMMEDIATE;
 
 ALTER TABLE "map"."saved_place" ADD FOREIGN KEY ("category_code") REFERENCES "map"."lkp_place_category" ("code") DEFERRABLE INITIALLY IMMEDIATE;
 
