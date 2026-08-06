@@ -6,9 +6,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface DayEntryRepository extends JpaRepository<DayEntry, DayEntryId> {
     List<DayEntry> findByIdRoomIdOrderByIdEntryDateDesc(UUID roomId);
+
     List<DayEntry> findByIdRoomIdAndIdEntryDateBetween(UUID roomId, LocalDate from, LocalDate to);
+
+    Optional<DayEntry> findByIdRoomIdAndIdEntryDate(UUID roomId, LocalDate entryDate);
+
 }

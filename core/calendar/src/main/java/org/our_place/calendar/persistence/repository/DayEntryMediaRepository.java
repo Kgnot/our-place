@@ -9,5 +9,8 @@ import java.util.List;
 import java.util.UUID;
 
 public interface DayEntryMediaRepository extends JpaRepository<DayEntryMedia, DayEntryMediaId> {
+    /** Trae todos los links de fotos del mes de una — se agrupan por día en el service. */
+    List<DayEntryMedia> findByIdRoomIdAndIdEntryDateBetween(UUID roomId, LocalDate from, LocalDate to);
+
     List<DayEntryMedia> findByIdRoomIdAndIdEntryDate(UUID roomId, LocalDate entryDate);
 }
