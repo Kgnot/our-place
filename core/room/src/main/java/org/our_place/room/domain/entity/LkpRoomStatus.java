@@ -1,4 +1,4 @@
-package org.our_place.room.persistence.entity;
+package org.our_place.room.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

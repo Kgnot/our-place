@@ -1,19 +1,20 @@
-package org.our_place.room.persistence.entity;
+package org.our_place.room.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.domain.Persistable;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+
 
 @Entity
 @Table(name = "rooms", schema = "room")
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-public class Rooms {
+public class Rooms implements Persistable<UUID> {
 
     /** UUID: id de tenant, referenciado desde varios schemas. */
     @Id
@@ -43,4 +44,39 @@ public class Rooms {
 
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
+
+    @Transient
+    private boolean isNew = false;
+
+    public static Rooms create(String name, LkpRoomStatus status, LkpRelationshipType relationshipType,
+                               UUID ownerUserId, LocalDate anniversaryDate, String timezone) {
+        Rooms room = new Rooms();
+        room.id = UUID.randomUUID();
+        room.isNew = true;
+        room.name = name;
+        room.status = status;
+        room.relationshipType = relationshipType;
+        room.ownerUserId = ownerUserId;
+        room.anniversaryDate = anniversaryDate;
+        if (timezone != null && !timezone.isBlank()) {
+            room.timezone = timezone;
+        }
+        room.createdAt = OffsetDateTime.now();
+        return room;
+    }
+
+    public void changeStatus(LkpRoomStatus newStatus) {
+        this.status = newStatus;
+    }
+
+    @Override
+    public boolean isNew() {
+        return isNew;
+    }
+
+    @PostPersist
+    @PostLoad
+    void markNotNew() {
+        this.isNew = false;
+    }
 }
