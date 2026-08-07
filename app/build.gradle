@@ -24,6 +24,14 @@ dependencies {
     runtimeOnly libs.jjwt.jackson
     implementation libs.spring.security.crypto
     implementation libs.spring.data.envers
+    // AWS
+    implementation(platform(libs.aws.bom))
+    implementation(libs.aws.s3)       // S3Client + S3Presigner
+    implementation(libs.aws.auth)      // AwsCredentialsProvider
+
+    // Procesamiento de imágenes
+    implementation(libs.thumbnailator)
+    implementation(libs.metadata.extractor)
 }
 
 bootJar {

@@ -7,20 +7,16 @@ plugins {
 description = 'Image Storage Worker - Manages image uploads to R2 (Cloudflare)'
 
 dependencies {
-    // Spring Boot Core
-    implementation libs.spring.boot.starter.web
-    implementation libs.spring.boot.starter.webflux
-
+    implementation project(':core:gallery')
     // AWS SDK v2 for R2 compatibility
-    implementation platform(libs.aws.bom)
-    implementation libs.aws.s3
-    implementation libs.aws.s3.transfer.manager
+    implementation(platform(libs.aws.bom))
+    implementation(libs.aws.s3)       // S3Client + S3Presigner
+    implementation(libs.aws.auth)      // AwsCredentialsProvider
 
-    // File handling
-    implementation libs.bundles.file.handling
+    // Procesamiento de imágenes
+    implementation(libs.thumbnailator)
+    implementation(libs.metadata.extractor)
 
-    // Validation
-    implementation libs.spring.boot.starter.validation
 
     // Monitoring
     implementation libs.spring.boot.starter.actuator
@@ -34,7 +30,6 @@ dependencies {
     annotationProcessor libs.lombok
 
     // Development
-//    developmentOnly libs.spring.boot.devtools
 
     // Testing
     testImplementation libs.spring.boot.starter.test
@@ -45,9 +40,6 @@ dependencies {
     testRuntimeOnly libs.junit.platform.launcher
 }
 
-//bootJar {
-//    mainClass = 'org.our_place.ImageStorageApplication'
-//}
 
 jar {
     enabled = false

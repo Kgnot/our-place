@@ -13,7 +13,7 @@ allprojects {
         mavenCentral()
         maven {
             name = 'osgeo'
-            url='https://repo.osgeo.org/repository/release/'
+            url = 'https://repo.osgeo.org/repository/release/'
         }
     }
 }
@@ -37,8 +37,22 @@ repositories {
 }
 
 
-configure(subprojects.findAll { it.name in
-        ['billing', 'calendar', 'common', 'gallery', 'identity', 'map', 'notification', 'room', 'app','shared','pet','affection'] }) {
+configure(subprojects.findAll {
+    it.name in
+            ['billing',
+             'calendar',
+             'common',
+             'gallery',
+             'identity',
+             'map',
+             'notification',
+             'room',
+             'app',
+             'shared',
+             'pet',
+             'affection',
+             'imageStorage']
+}) {
 
     plugins.withId('io.spring.dependency-management') {
         dependencyManagement {

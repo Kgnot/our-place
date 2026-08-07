@@ -9,6 +9,14 @@ description = 'Gallery Service - manage read operation to the gallery (images, v
 dependencies {
     // Módulo transversal (JwtAuthenticationFilter, PublicEndpoints, AuthenticatedUser, etc.)
     implementation project(':core:common')
-    implementation project(':core:identity')
     implementation project(':shared')
+    implementation project(':core:identity')
+    //extra
+    implementation project(':core:room')
+
+    //para imagenes
+    // AWS SDK v2 for R2 compatibility
+    implementation platform(libs.aws.bom)
+    implementation libs.aws.s3
+    implementation libs.aws.s3.transfer.manager
 }

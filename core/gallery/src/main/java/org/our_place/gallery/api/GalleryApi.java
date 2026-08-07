@@ -1,7 +1,8 @@
 package org.our_place.gallery.api;
 
 import org.our_place.common.shared.SharedApi;
-import org.our_place.gallery.service.dto.MediaDto;
+import org.our_place.gallery.api.dto_shared.MediaSummaryShared;
+import org.our_place.gallery.application.service.dto.MediaSummaryDto;
 
 import java.util.List;
 import java.util.UUID;
@@ -13,7 +14,7 @@ public interface GalleryApi {
 
     List<String> getUrlsByIdsBach(List<UUID> ids);
 
-    MediaDto getMediaById(UUID id);
+    MediaSummaryShared getMediaById(UUID id);
 
-    List<MediaDto> getMediasByIdsBach(List<UUID> ids);
+    List<MediaSummaryShared> getMediasByIdsBach(List<UUID> ids);
 }

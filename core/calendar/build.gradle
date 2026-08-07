@@ -11,6 +11,8 @@ dependencies {
     implementation project(':core:common')
     implementation project(':core:identity')
     implementation project(':shared')
+    // extra
+    implementation project(':core:gallery')
 
     implementation libs.joda.time
     implementation libs.jackson.datatype.jsr310

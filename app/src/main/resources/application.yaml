@@ -13,7 +13,14 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc.lob.non_contextual_creation: true
-
+  cloud:
+    aws:
+      s3:
+        endpoint: ${R2_ENDPOINT}
+      credentials:
+        access-key: ${R2_ACCESS_KEY}
+        secret-key: ${R2_SECRET_KEY}
+      region: auto
 management:
   newrelic:
     metrics:
@@ -33,3 +40,10 @@ app:
       secret: ${JWT_SECRET}
       expiration-ms: 3600000 # 1 hour
       refresh-expiration-ms: 156400000     # 43 days
+
+#R2
+r2:
+  account-id: ${R2_ACCOUNT_ID}
+  access-key: ${R2_ACCESS_KEY}
+  secret-key: ${R2_SECRET_KEY}
+  bucket: ${R2_BUCKET:our-place-media}

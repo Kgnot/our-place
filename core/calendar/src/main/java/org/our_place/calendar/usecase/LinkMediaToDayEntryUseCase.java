@@ -26,7 +26,7 @@ public class LinkMediaToDayEntryUseCase implements UseCase<LinkMediaToDayEntryCo
     public LinkMediaToDayEntryOutput execute(LinkMediaToDayEntryCommand command) {
         DayEntryId dayEntryId = new DayEntryId(command.roomId(), command.entryDate());
         if (!dayEntryRepository.existsById(dayEntryId)) {
-            throw new DayEntryNotFoundException();
+            throw new DayEntryNotFoundException(command.roomId(), command.entryDate().toString());
         }
 
         DayEntryMedia link = DayEntryMedia.create(command.roomId(), command.entryDate(), command.mediaId());
