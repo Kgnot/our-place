@@ -13,6 +13,4 @@ management:
 
 app:
   cors:
-    allowed-origins:
-      - "http://localhost:4000"
-      - "http://192.168.1.5:4000"
+    allowed-origins: ${FRONTEND_URL_DEV}

@@ -13,5 +13,4 @@ management:
 
 app:
   cors:
-    allowed-origins:
-      - ${FRONTEND_URL}
+    allowed-origins: ${FRONTEND_URL}

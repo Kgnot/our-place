@@ -1,7 +1,5 @@
 package org.our_place.ourplacebackend.config;
 
-//import org.jspecify.annotations.NonNull;
-
 import org.springframework.lang.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -15,25 +13,21 @@ import java.util.List;
 public class CorsConfig {
 
     @Value("${app.cors.allowed-origins}")
-    private List<String> allowedOrigins;
+    private String allowedOrigins;
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
 
             @Override
-            public void addCorsMappings(
-                    @NonNull CorsRegistry registry
-            ) {
+            public void addCorsMappings(@NonNull CorsRegistry registry) {
                 registry
                         .addMapping("/**")
-                        .allowedOrigins(allowedOrigins.toArray(new String[0]))
+                        .allowedOrigins(allowedOrigins)
                         .allowedMethods("*")
                         .allowedHeaders("*")
                         .allowCredentials(true);
             }
         };
-
-
     }
 }
