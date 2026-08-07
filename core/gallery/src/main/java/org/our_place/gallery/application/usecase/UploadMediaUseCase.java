@@ -15,13 +15,8 @@ import org.our_place.shared.application.bus.EventBus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Registra el metadata de una foto/video ya subido a R2 (el upload físico del archivo pasa por
- * fuera de este caso de uso, ej. presigned URL). Queda en estado PENDING; el thumbnail y el
- * EXIF los completa un job async vía markProcessingCompleted (ver comentario en la entidad).
- */
 @Component
-@RequiredArgsConstructor//TODO PENSAR EN ESTO, ESTO ES UN WORKER QUE SE MANEJA POR EVENTO
+@RequiredArgsConstructor
 @Transactional
 public class UploadMediaUseCase implements UseCase<UploadMediaCommand, UploadMediaOutput> {
 
@@ -41,7 +36,8 @@ public class UploadMediaUseCase implements UseCase<UploadMediaCommand, UploadMed
 
         Media media = Media.create(
                 command.roomId(), command.uploadedByUserId(), command.r2Url(), mediaType, pending,
-                command.mimeType(), command.fileSizeBytes(), command.takenAt(), command.caption()
+                command.mimeType(), command.fileSizeBytes(), command.takenAt(), command.latitude(),
+                command.longitude(), command.caption()
         );
         mediaRepository.save(media);
         eventPublisher.publish(new MediaUploadedEvent(

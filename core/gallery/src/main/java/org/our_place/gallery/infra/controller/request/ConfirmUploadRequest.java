@@ -20,6 +20,8 @@ public record ConfirmUploadRequest(
             @NotNull String mimeType,
             Long fileSizeBytes,
             OffsetDateTime takenAt,
+            Double latitude, // aqui un "punto para la localización"
+            Double longitude,
             String caption
     ) {}
 }

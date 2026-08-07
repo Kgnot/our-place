@@ -99,7 +99,10 @@ public class Media implements Persistable<UUID> {
 
     public static Media create(UUID roomId, UUID uploadedByUserId, String r2Url,
                                LkpMediaType mediaType, LkpProcessingStatus initialStatus,
-                               String mimeType, Long fileSizeBytes, OffsetDateTime takenAt, String caption) {
+                               String mimeType, Long fileSizeBytes,
+                               OffsetDateTime takenAt,
+                               Double latitude, Double longitude,
+                               String caption) {
         Media media = new Media();
         media.id = UUID.randomUUID();
         media.isNew = true;
@@ -113,6 +116,12 @@ public class Media implements Persistable<UUID> {
         media.takenAt = takenAt;
         media.caption = caption;
         media.createdAt = OffsetDateTime.now();
+
+        // Location desde EXIF (si viene)
+        if (latitude != null && longitude != null) {
+            media.location = "POINT(%s %s)".formatted(longitude, latitude);  // PostGIS: lng lat
+        }
+
         return media;
     }
 

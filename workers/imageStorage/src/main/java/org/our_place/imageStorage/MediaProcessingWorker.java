@@ -46,27 +46,17 @@ public class MediaProcessingWorker {
             String thumbnailKey = event.r2Key().replace("/media/", "/thumbnails/");
             r2StorageService.upload(thumbnailKey, thumbnailBytes, "image/jpeg");
 
-            // 3. Extrae EXIF
+            // 3. EXIF completo como JSON raw
             var exif = exifExtractor.extract(originalBytes, event.mimeType());
-
-            // 4. Busca status COMPLETED
-            WorkerLkpProcessingStatus completed = processingStatusRepository
-                    .findById(ProcessingStatus.COMPLETED.code())
-                    .orElseThrow(() -> new IllegalStateException("lkp_processing_status seed missing: COMPLETED"));
-
-            // 5. Location WKT (PostGIS geography) — null si no tiene GPS
-            String locationWkt = null;
-            if (exif.hasLocation()) {
-                locationWkt = "POINT(%s %s)".formatted(exif.longitude(), exif.latitude());
-            }
-
-            // 6. EXIF raw como JSON
             String exifJson = buildExifJson(exif);
 
-            // 7. Actualiza entidad
-            WorkerMedia workerMedia = workerMediaRepository.findById(event.mediaId()).orElseThrow();
-            workerMedia.markProcessingCompleted(thumbnailKey, exifJson, locationWkt, null, completed);
-            //                                                 exifJson ↑    WKT ↑   savedPlaceId=null (lo resuelve otro job)
+            // 4. Marca completado — solo thumbnail + exifRaw
+            WorkerLkpProcessingStatus completed = processingStatusRepository
+                    .findById(ProcessingStatus.COMPLETED.code())
+                    .orElseThrow(() -> new IllegalStateException("seed missing: COMPLETED"));
+
+            WorkerMedia media = workerMediaRepository.findById(event.mediaId()).orElseThrow();
+            media.markProcessingCompleted(thumbnailKey, exifJson, completed);
 
             log.info("Media {} processed successfully", event.mediaId());
 
@@ -75,10 +65,10 @@ public class MediaProcessingWorker {
 
             WorkerLkpProcessingStatus failed = processingStatusRepository
                     .findById(ProcessingStatus.FAILED.code())
-                    .orElseThrow(() -> new IllegalStateException("lkp_processing_status seed missing: FAILED"));
+                    .orElseThrow(() -> new IllegalStateException("seed missing: FAILED"));
 
-            WorkerMedia workerMedia = workerMediaRepository.findById(event.mediaId()).orElseThrow();
-            workerMedia.markProcessingFailed(e.getMessage(), failed);
+            WorkerMedia media = workerMediaRepository.findById(event.mediaId()).orElseThrow();
+            media.markProcessingFailed(e.getMessage(), failed);
         }
     }
 

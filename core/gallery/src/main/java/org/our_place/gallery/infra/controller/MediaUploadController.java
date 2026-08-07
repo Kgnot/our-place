@@ -60,7 +60,9 @@ public class MediaUploadController {
                     UploadMediaOutput output = uploadMediaUseCase.execute(new UploadMediaCommand(
                             roomId, userId, item.r2Key(), item.mediaTypeCode().code(),
                             item.mimeType(), item.fileSizeBytes(),
-                            item.takenAt(), item.caption()
+                            item.takenAt(),
+                            item.latitude(), item.longitude(),
+                            item.caption()
                     ));
                     return MediaSummaryResponse.from(mediaQueryService.getMediaById(output.mediaId()));
                 })
@@ -75,7 +77,7 @@ public class MediaUploadController {
         UUID userId = roomMembershipGuard.requireMember(roomId);
         UploadMediaOutput output = uploadMediaUseCase.execute(new UploadMediaCommand(
                 roomId, userId, request.r2Url(), request.mediaTypeCode(), request.mimeType(),
-                request.fileSizeBytes(), request.takenAt(), request.caption()
+                request.fileSizeBytes(), request.takenAt(), request.latitude(), request.longitude(), request.caption()
         ));
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(MediaDetailResponse.from(mediaQueryService.getDetail(output.mediaId(), userId)));

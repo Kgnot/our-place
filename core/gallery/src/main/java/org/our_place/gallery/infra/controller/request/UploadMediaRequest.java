@@ -10,6 +10,8 @@ public record UploadMediaRequest(
         String mimeType,
         Long fileSizeBytes,
         OffsetDateTime takenAt,
+        Double latitude,
+        Double longitude,
         String caption
 ) {
 }

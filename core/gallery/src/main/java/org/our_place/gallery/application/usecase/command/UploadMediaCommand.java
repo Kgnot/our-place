@@ -11,6 +11,8 @@ public record UploadMediaCommand(
         String mimeType,
         Long fileSizeBytes,
         OffsetDateTime takenAt,
+        Double latitude,
+        Double longitude,
         String caption
 ) {
 }

@@ -27,22 +27,13 @@ import java.util.UUID;
 @NoArgsConstructor
 public class WorkerMedia implements Persistable<UUID> {
 
-    /**
-     * UUID: contenido íntimo/privado, evita enumeración entre salas.
-     */
     @Id
     @Column(name = "id", nullable = false)
     private UUID id;
 
-    /**
-     * Sin FK real: referencia lógica cross-schema a room.rooms.id.
-     */
     @Column(name = "room_id", nullable = false)
     private UUID roomId;
 
-    /**
-     * Sin FK real: referencia lógica cross-schema a identity.users_login.id.
-     */
     @Column(name = "uploaded_by_user_id", nullable = false)
     private UUID uploadedByUserId;
 
@@ -53,7 +44,7 @@ public class WorkerMedia implements Persistable<UUID> {
     private String thumbnailUrl;
 
     @Column(name = "media_type_code", length = 30, nullable = false)
-    private String media_type_code;
+    private String mediaTypeCode;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "processing_status_code", referencedColumnName = "code", nullable = false)
@@ -78,34 +69,23 @@ public class WorkerMedia implements Persistable<UUID> {
     private OffsetDateTime takenAt;
 
     /**
-     * Tipo geography de PostGIS; se mapea como texto (WKT) a nivel de entidad.
+     * Tipo geography de PostGIS; se mapea como WKT a nivel de entidad.
+     * Se setea en create() desde el EXIF que manda el frontend.
      */
     @ColumnTransformer(read = "ST_AsText(location)", write = "ST_GeogFromText(?)")
     @Column(name = "location", columnDefinition = "geography")
-    private String location; // TODO, cambiar esto a Point, hace que sea mas trabajo pero es necesario, recuerda hacerlo en ambas entidades, esta y la "original" que esta en gallery
+    private String location;
 
-    /**
-     * Sin FK real: referencia lógica cross-schema a map.saved_place.id. Nullable: se completa async vía job de EXIF.
-     */
     @Column(name = "saved_place_id")
     private UUID savedPlaceId;
 
-    /**
-     * Payload crudo de EXIF, en formato JSON.
-     */
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "exif_raw_payload", columnDefinition = "jsonb")
     private String exifRawPayload;
 
-    /**
-     * Papelera (soft delete).
-     */
     @Column(name = "deleted_at")
     private OffsetDateTime deletedAt;
 
-    /**
-     * Borrado definitivo, gestionado por job periódico.
-     */
     @Column(name = "purge_at")
     private OffsetDateTime purgeAt;
 
@@ -115,34 +95,58 @@ public class WorkerMedia implements Persistable<UUID> {
     @Transient
     private boolean isNew = false;
 
-    public static WorkerMedia create(UUID roomId, UUID uploadedByUserId, String r2Url,
-                                     String mediaType, WorkerLkpProcessingStatus initialStatus,
-                                     String mimeType, Long fileSizeBytes, OffsetDateTime takenAt, String caption) {
-        WorkerMedia workerMedia = new WorkerMedia();
-        workerMedia.id = UUID.randomUUID();
-        workerMedia.isNew = true;
-        workerMedia.roomId = roomId;
-        workerMedia.uploadedByUserId = uploadedByUserId;
-        workerMedia.r2Url = r2Url;
-        workerMedia.media_type_code = mediaType;
-        workerMedia.processingStatus = initialStatus;
-        workerMedia.mimeType = mimeType;
-        workerMedia.fileSizeBytes = fileSizeBytes;
-        workerMedia.takenAt = takenAt;
-        workerMedia.caption = caption;
-        workerMedia.createdAt = OffsetDateTime.now();
-        return workerMedia;
+    /**
+     * Punto único de construcción. Recibe takenAt y coordenadas del EXIF
+     * extraído por el frontend (llega vía /confirm). Si no hay EXIF,
+     * takenAt=null (se usa createdAt como fallback) y location=null.
+     */
+    public static WorkerMedia create(
+            UUID roomId,
+            UUID uploadedByUserId,
+            String r2Url,
+            String mediaTypeCode,
+            WorkerLkpProcessingStatus initialStatus,
+            String mimeType,
+            Long fileSizeBytes,
+            OffsetDateTime takenAt,
+            Double latitude,           // ← del EXIF del frontend
+            Double longitude,          // ← del EXIF del frontend
+            String caption
+    ) {
+        WorkerMedia media = new WorkerMedia();
+        media.id = UUID.randomUUID();
+        media.isNew = true;
+        media.roomId = roomId;
+        media.uploadedByUserId = uploadedByUserId;
+        media.r2Url = r2Url;
+        media.mediaTypeCode = mediaTypeCode;
+        media.processingStatus = initialStatus;
+        media.mimeType = mimeType;
+        media.fileSizeBytes = fileSizeBytes;
+        media.takenAt = takenAt;
+        media.caption = caption;
+        media.createdAt = OffsetDateTime.now();
+
+        // Location desde EXIF del frontend (si viene)
+        if (latitude != null && longitude != null) {
+            media.location = "POINT(%s %s)".formatted(longitude, latitude); // PostGIS: lng lat
+        }
+
+        return media;
     }
 
     /**
-     * Llamado por el job de procesamiento async (thumbnail + EXIF), no por el usuario final.
+     * Worker: solo actualiza thumbnail + exifRawPayload.
+     * takenAt y location YA están seteados desde create().
+     * savedPlaceId lo resuelve otro job async (GeoNames reverse geocode).
      */
-    public void markProcessingCompleted(String thumbnailUrl, String exifRawPayload,
-                                        String location, UUID savedPlaceId, WorkerLkpProcessingStatus completedStatus) {
+    public void markProcessingCompleted(
+            String thumbnailUrl,
+            String exifRawPayload,
+            WorkerLkpProcessingStatus completedStatus
+    ) {
         this.thumbnailUrl = thumbnailUrl;
         this.exifRawPayload = exifRawPayload;
-        this.location = location;
-        this.savedPlaceId = savedPlaceId;
         this.processingStatus = completedStatus;
         this.errorMessage = null;
     }
