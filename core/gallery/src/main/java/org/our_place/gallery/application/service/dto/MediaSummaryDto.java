@@ -9,4 +9,7 @@ public record MediaSummaryDto(
         String mediaTypeCode,
         OffsetDateTime takenAt
 ) {
+    public MediaSummaryDto withThumbnailUrl(String newThumbnailUrl) {
+        return new MediaSummaryDto(id, newThumbnailUrl, mediaTypeCode, takenAt);
+    }
 }

@@ -3,9 +3,10 @@ package org.our_place.gallery.infra.r2;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
 import java.time.Duration;
@@ -37,6 +38,26 @@ public class R2PresignedUrlGenerator {
         String uploadUrl = s3Presigner.presignPutObject(presignRequest).url().toString();
 
         return new PresignedUpload(uploadUrl, r2Key);
+    }
+
+    /**
+     * Genera una URL de lectura firmada para una key existente (thumbnail u original).
+     * Devuelve null si key es null, para no romper media que todavía no tiene thumbnail generado.
+     */
+    public String generateGetUrl(String r2Key) {
+        if (r2Key == null) return null;
+
+        GetObjectRequest getRequest = GetObjectRequest.builder()
+                .bucket(bucket)
+                .key(r2Key)
+                .build();
+
+        GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+                .getObjectRequest(getRequest)
+                .signatureDuration(Duration.ofHours(1))
+                .build();
+
+        return s3Presigner.presignGetObject(presignRequest).url().toString();
     }
 
     public record PresignedUpload(String uploadUrl, String r2Key) {}

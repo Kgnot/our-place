@@ -12,6 +12,7 @@ import org.our_place.gallery.domain.exception.MediaNotFoundException;
 import org.our_place.gallery.infra.persistence.repository.MediaCommentRepository;
 import org.our_place.gallery.infra.persistence.repository.MediaReactionRepository;
 import org.our_place.gallery.infra.persistence.repository.MediaRepository;
+import org.our_place.gallery.infra.r2.R2PresignedUrlGenerator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,11 +31,15 @@ public class MediaQueryService {
     private final MediaRepository mediaRepository;
     private final MediaCommentRepository mediaCommentRepository;
     private final MediaReactionRepository mediaReactionRepository;
+    private final R2PresignedUrlGenerator r2PresignedUrlGenerator;
 
     public Page<MediaSummaryDto> listByRoom(UUID roomId, Pageable pageable) {
         return mediaRepository
                 .findByRoomIdAndDeletedAtIsNullOrderByTakenAtDescCreatedAtDesc(roomId, pageable)
-                .map(MediaServiceMapper::toSummaryDto);
+                .map(MediaServiceMapper::toSummaryDto)
+                .map(dto -> dto.withThumbnailUrl(
+                        r2PresignedUrlGenerator.generateGetUrl(dto.thumbnailUrl())
+                ));
     }
 
     public MediaDetailDto getDetail(UUID mediaId, UUID currentUserId) {
@@ -50,8 +55,8 @@ public class MediaQueryService {
 
         return new MediaDetailDto(
                 media.getId(),
-                media.getR2Url(),
-                media.getThumbnailUrl(),
+                r2PresignedUrlGenerator.generateGetUrl(media.getR2Url()),
+                r2PresignedUrlGenerator.generateGetUrl(media.getThumbnailUrl()),
                 media.getMediaType().getCode(),
                 media.getCaption(),
                 media.getTakenAt(),
