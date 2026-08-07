@@ -1,8 +1,9 @@
-package org.our_place.gallery.infra.r2;
+package org.our_place.common.shared.r2;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -21,6 +22,9 @@ public class R2PresignedUrlGenerator {
     @Value("${r2.bucket}")
     private String bucket;
 
+    /**
+     * Genera una URL de subida firmada para un archivo a ser subido a R2.
+     */
     public PresignedUpload generate(UUID roomId, UUID mediaId, String mimeType) {
         String r2Key = "rooms/%s/media/%s/%s".formatted(roomId, mediaId, UUID.randomUUID());
 

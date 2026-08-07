@@ -7,4 +7,10 @@ plugins {
 description = 'Common service - manage common functionalities for all services (authentication, authorization, etc.)'
 
 dependencies {
+
+    //para imagenes
+    // AWS SDK v2 for R2 compatibility
+    implementation platform(libs.aws.bom)
+    implementation libs.aws.s3
+    implementation libs.aws.s3.transfer.manager
 }

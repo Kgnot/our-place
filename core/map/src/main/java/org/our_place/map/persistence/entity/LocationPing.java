@@ -2,6 +2,7 @@ package org.our_place.map.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnTransformer;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -36,7 +37,8 @@ public class LocationPing {
     private UUID roomId;
 
     /** Tipo geography de PostGIS; se mapea como texto (WKT) a nivel de entidad. */
-    @Column(name = "location", nullable = false, columnDefinition = "geography")
+    @ColumnTransformer(read = "ST_AsText(location)", write = "ST_GeogFromText(?)")
+    @Column(name = "location", columnDefinition = "geography")
     private String location;
 
     @Column(name = "battery_level")

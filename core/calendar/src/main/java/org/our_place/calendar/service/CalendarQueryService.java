@@ -12,6 +12,7 @@ import org.our_place.calendar.service.dto.CalendarDayDto;
 import org.our_place.calendar.service.dto.CalendarMonthDto;
 import org.our_place.calendar.service.dto.DayEntryDetailDto;
 import org.our_place.calendar.service.dto.MediaDetailDto;
+import org.our_place.gallery.application.service.dto.MediaSummaryDto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,15 +28,14 @@ import java.util.stream.Collectors;
 public class CalendarQueryService {
 
     private final DayEntryRepository dayEntryRepository;
-    private final DayEntryMediaRepository dayEntryMediaRepository;
     private final GalleryExternalApi galleryExternalApi;
 
     public CalendarMonthDto getMonth(UUID roomId, int year, int month) {
-
         YearMonth yearMonth = YearMonth.of(year, month);
         LocalDate firstDay = yearMonth.atDay(1);
         LocalDate lastDay = yearMonth.atEndOfMonth();
 
+        // 1. Entries del mes (diario/mood)
         Map<LocalDate, DayEntry> entriesByDate = dayEntryRepository
                 .findByIdRoomIdAndIdEntryDateBetween(roomId, firstDay, lastDay)
                 .stream()
@@ -44,51 +44,29 @@ public class CalendarQueryService {
                         Function.identity()
                 ));
 
-        List<DayEntryMedia> dayMedias = dayEntryMediaRepository
-                .findByIdRoomIdAndIdEntryDateBetween(roomId, firstDay, lastDay);
-
-        Map<LocalDate, List<UUID>> mediaIdsByDate = dayMedias.stream()
+        // 2. Fotos del mes — query directa a gallery por takenAt
+        Map<LocalDate, List<MediaSummaryDto>> photosByDate = galleryExternalApi
+                .getMediaByRoomAndDateRange(roomId, firstDay, lastDay)
+                .stream()
                 .collect(Collectors.groupingBy(
-                        m -> m.getId().getEntryDate(),
-                        Collectors.mapping(
-                                m -> m.getId().getMediaId(),
-                                Collectors.toList()
-                        )
+                        media -> media.takenAt().toLocalDate()
                 ));
 
-        List<UUID> allMediaIds = dayMedias.stream()
-                .map(m -> m.getId().getMediaId())
-                .distinct()
-                .toList();
-
-        Map<UUID, MediaDto> mediasById = allMediaIds.isEmpty()
-                ? Collections.emptyMap()
-                : galleryExternalApi.getMediasByIdsBach(allMediaIds)
-                  .stream().collect(Collectors.toMap(MediaDto::id, Function.identity()));
-
+        // 3. Construir cada día
         List<CalendarDayDto> days = new ArrayList<>(yearMonth.lengthOfMonth());
 
         for (int day = 1; day <= yearMonth.lengthOfMonth(); day++) {
-
             LocalDate date = yearMonth.atDay(day);
             DayEntry entry = entriesByDate.get(date);
-            List<MediaDetailDto> medias = mediaIdsByDate
-                    .getOrDefault(date, List.of())
-                    .stream()
-                    .map(mediasById::get)
-                    .filter(Objects::nonNull)
-                    .map(media -> new MediaDetailDto(
-                            media.id(),
-                            media.url()
-                    ))
-                    .toList();
+            List<MediaSummaryDto> photos = photosByDate.getOrDefault(date, List.of());
 
             days.add(new CalendarDayDto(
                     date,
                     entry != null,
                     entry != null ? entry.getMoodEmoji() : null,
-                    medias,
-                    medias.size()
+                    !photos.isEmpty(),
+                    photos.size(),
+                    photos.stream().limit(4).toList()   // preview: 4 thumbnails
             ));
         }
 
@@ -96,32 +74,20 @@ public class CalendarQueryService {
     }
 
     public DayEntryDetailDto getDayDetail(UUID roomId, LocalDate date) {
-
+        // Entry (puede no existir si solo hay fotos)
         DayEntry entry = dayEntryRepository
                 .findByIdRoomIdAndIdEntryDate(roomId, date)
-                .orElseThrow(() ->
-                        new DayEntryNotFoundException(roomId, date.toString()));
+                .orElse(null);
 
-        List<UUID> mediaIds = dayEntryMediaRepository
-                .findByIdRoomIdAndIdEntryDate(roomId, date)
-                .stream()
-                .map(m -> m.getId().getMediaId())
-                .filter(Objects::nonNull)
-                .toList();
-
-        List<MediaDetailDto> medias = galleryExternalApi.getMediasByIdsBach(mediaIds)
-                .stream()
-                .map(media -> new MediaDetailDto(
-                        media.id(),
-                        media.url()
-                ))
-                .toList();
+        // Fotos de ese día
+        List<MediaSummaryDto> photos = galleryExternalApi
+                .getMediaByRoomAndDate(roomId, date);
 
         return new DayEntryDetailDto(
                 date,
-                entry.getContent(),
-                entry.getMoodEmoji(),
-                medias
+                entry != null ? entry.getContent() : null,
+                entry != null ? entry.getMoodEmoji() : null,
+                photos
         );
     }
 }

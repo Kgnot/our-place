@@ -1,5 +1,7 @@
 package org.our_place.calendar.service.dto;
 
+import org.our_place.gallery.application.service.dto.MediaSummaryDto;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -8,8 +10,5 @@ public record DayEntryDetailDto(
         LocalDate date,
         String content,
         String moodEmoji,
-        List<MediaDetailDto> mediaIds
-) {
-
-
-}
+        List<MediaSummaryDto> photos   // todas las fotos del día
+) {}

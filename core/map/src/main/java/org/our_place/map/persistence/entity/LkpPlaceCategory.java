@@ -19,6 +19,6 @@ public class LkpPlaceCategory {
     @Column(name = "name", length = 100, nullable = false)
     private String name;
 
-    @Column(name = "icon_url", length = 255)
+    @Column(name = "icon_url")
     private String iconUrl;
 }

@@ -5,6 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,4 +19,7 @@ public interface MediaRepository extends JpaRepository<Media, UUID> {
 
     /** Usado por MediaApi para resolver thumbnails de una lista de mediaId (ej. desde `calendar`). */
     List<Media> findByIdInAndDeletedAtIsNull(List<UUID> ids);
+
+    /** Usado por MediaApi para buscar medias por ID de habitación y rango de fechas. */
+    List<Media> findByRoomIdAndTakenAtBetweenAndDeletedAtIsNullOrderByTakenAtDesc(UUID roomId, OffsetDateTime start, OffsetDateTime end);
 }

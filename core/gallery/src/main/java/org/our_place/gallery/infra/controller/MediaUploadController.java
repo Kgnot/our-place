@@ -13,7 +13,7 @@ import org.our_place.gallery.infra.controller.request.UploadMediaRequest;
 import org.our_place.gallery.infra.controller.response.BatchUploadResponse;
 import org.our_place.gallery.infra.controller.response.MediaDetailResponse;
 import org.our_place.gallery.infra.controller.response.MediaSummaryResponse;
-import org.our_place.gallery.infra.r2.R2PresignedUrlGenerator;
+import org.our_place.common.shared.r2.R2PresignedUrlGenerator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
