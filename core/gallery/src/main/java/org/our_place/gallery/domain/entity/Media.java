@@ -2,6 +2,9 @@ package org.our_place.gallery.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnTransformer;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.domain.Persistable;
 
 import java.time.OffsetDateTime;
@@ -68,6 +71,7 @@ public class Media implements Persistable<UUID> {
     private OffsetDateTime takenAt;
 
     /** Tipo geography de PostGIS; se mapea como texto (WKT) a nivel de entidad. */
+    @ColumnTransformer(read = "ST_AsText(location)", write = "ST_GeogFromText(?)")
     @Column(name = "location", columnDefinition = "geography")
     private String location;
 
@@ -75,6 +79,7 @@ public class Media implements Persistable<UUID> {
     @Column(name = "saved_place_id")
     private UUID savedPlaceId;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "exif_raw_payload", columnDefinition = "jsonb")
     private String exifRawPayload;
 

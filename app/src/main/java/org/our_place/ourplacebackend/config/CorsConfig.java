@@ -1,6 +1,7 @@
 package org.our_place.ourplacebackend.config;
 
 //import org.jspecify.annotations.NonNull;
+
 import org.springframework.lang.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -25,7 +26,9 @@ public class CorsConfig {
                 registry
                         .addMapping("/**")
                         .allowedOrigins(allowedOrigins)
-                        .allowedMethods("*");
+                        .allowedMethods("*")
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
             }
         };
 

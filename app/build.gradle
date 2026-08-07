@@ -17,6 +17,7 @@ dependencies {
     implementation project(':core:notification')
     implementation project(':core:pet')
     implementation project(':core:room')
+    implementation project(':workers:imageStorage')
     implementation project(':shared')
     // Lo específico de emitir/validar JWT — SOLO identity lo necesita
     implementation libs.jjwt.api

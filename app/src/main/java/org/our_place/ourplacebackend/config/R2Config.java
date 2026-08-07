@@ -8,6 +8,7 @@ import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3Configuration; // <-- nuevo import
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import java.net.URI;
@@ -28,6 +29,14 @@ public class R2Config {
         return URI.create("https://%s.r2.cloudflarestorage.com".formatted(accountId));
     }
 
+    // Fuerza URLs path-style (host.com/bucket/key) en vez de virtual-hosted (bucket.host.com/key),
+    // que es lo que R2 espera para que el preflight CORS resuelva correctamente.
+    private S3Configuration pathStyleConfig() {
+        return S3Configuration.builder()
+                .pathStyleAccessEnabled(true)
+                .build();
+    }
+
     @Bean
     public AwsCredentialsProvider r2CredentialsProvider() {
         return StaticCredentialsProvider.create(
@@ -41,6 +50,7 @@ public class R2Config {
                 .endpointOverride(endpoint())
                 .credentialsProvider(r2CredentialsProvider)
                 .region(Region.of("auto"))
+                .serviceConfiguration(pathStyleConfig()) // <-- nuevo
                 .build();
     }
 
@@ -50,6 +60,7 @@ public class R2Config {
                 .endpointOverride(endpoint())
                 .credentialsProvider(r2CredentialsProvider)
                 .region(Region.of("auto"))
+                .serviceConfiguration(pathStyleConfig()) // <-- nuevo
                 .build();
     }
 }

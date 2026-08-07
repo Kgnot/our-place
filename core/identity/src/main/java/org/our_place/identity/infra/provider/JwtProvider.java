@@ -30,16 +30,16 @@ public class JwtProvider {
     }
 
 
-    public String generateAccessToken(UUID userId, UUID tenantId, String email, List<String> roles) {
-        return buildToken(userId, tenantId, email, roles, accessExpirationMs, "ACCESS");
+    public String generateAccessToken(UUID userId, String email, List<String> roles) {
+        return buildToken(userId,email, roles, accessExpirationMs, "ACCESS");
     }
 
-    public String generateRefreshToken(UUID userId, UUID tenantId) {
+    public String generateRefreshToken(UUID userId) {
         // El refresh token no necesita roles o email, solo lo mínimo para identificar
-        return buildToken(userId, tenantId, null, null, refreshExpirationMs, "REFRESH");
+        return buildToken(userId,null, null, refreshExpirationMs, "REFRESH");
     }
 
-    private String buildToken(UUID userId, UUID tenantId, String email, List<String> roles, long expirationMs, String type) {
+    private String buildToken(UUID userId,String email, List<String> roles, long expirationMs, String type) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + expirationMs);
 

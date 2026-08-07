@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnTransformer;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.domain.Persistable;
 
 import java.time.OffsetDateTime;
@@ -22,7 +25,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Media implements Persistable<UUID> {
+public class WorkerMedia implements Persistable<UUID> {
 
     /**
      * UUID: contenido íntimo/privado, evita enumeración entre salas.
@@ -54,7 +57,7 @@ public class Media implements Persistable<UUID> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "processing_status_code", referencedColumnName = "code", nullable = false)
-    private LkpProcessingStatus processingStatus;
+    private WorkerLkpProcessingStatus processingStatus;
 
     @Column(name = "retry_count", nullable = false)
     private short retryCount = 0;
@@ -77,8 +80,9 @@ public class Media implements Persistable<UUID> {
     /**
      * Tipo geography de PostGIS; se mapea como texto (WKT) a nivel de entidad.
      */
+    @ColumnTransformer(read = "ST_AsText(location)", write = "ST_GeogFromText(?)")
     @Column(name = "location", columnDefinition = "geography")
-    private String location;
+    private String location; // TODO, cambiar esto a Point, hace que sea mas trabajo pero es necesario, recuerda hacerlo en ambas entidades, esta y la "original" que esta en gallery
 
     /**
      * Sin FK real: referencia lógica cross-schema a map.saved_place.id. Nullable: se completa async vía job de EXIF.
@@ -86,6 +90,10 @@ public class Media implements Persistable<UUID> {
     @Column(name = "saved_place_id")
     private UUID savedPlaceId;
 
+    /**
+     * Payload crudo de EXIF, en formato JSON.
+     */
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "exif_raw_payload", columnDefinition = "jsonb")
     private String exifRawPayload;
 
@@ -107,30 +115,30 @@ public class Media implements Persistable<UUID> {
     @Transient
     private boolean isNew = false;
 
-    public static Media create(UUID roomId, UUID uploadedByUserId, String r2Url,
-                               String mediaType, LkpProcessingStatus initialStatus,
-                               String mimeType, Long fileSizeBytes, OffsetDateTime takenAt, String caption) {
-        Media media = new Media();
-        media.id = UUID.randomUUID();
-        media.isNew = true;
-        media.roomId = roomId;
-        media.uploadedByUserId = uploadedByUserId;
-        media.r2Url = r2Url;
-        media.media_type_code = mediaType;
-        media.processingStatus = initialStatus;
-        media.mimeType = mimeType;
-        media.fileSizeBytes = fileSizeBytes;
-        media.takenAt = takenAt;
-        media.caption = caption;
-        media.createdAt = OffsetDateTime.now();
-        return media;
+    public static WorkerMedia create(UUID roomId, UUID uploadedByUserId, String r2Url,
+                                     String mediaType, WorkerLkpProcessingStatus initialStatus,
+                                     String mimeType, Long fileSizeBytes, OffsetDateTime takenAt, String caption) {
+        WorkerMedia workerMedia = new WorkerMedia();
+        workerMedia.id = UUID.randomUUID();
+        workerMedia.isNew = true;
+        workerMedia.roomId = roomId;
+        workerMedia.uploadedByUserId = uploadedByUserId;
+        workerMedia.r2Url = r2Url;
+        workerMedia.media_type_code = mediaType;
+        workerMedia.processingStatus = initialStatus;
+        workerMedia.mimeType = mimeType;
+        workerMedia.fileSizeBytes = fileSizeBytes;
+        workerMedia.takenAt = takenAt;
+        workerMedia.caption = caption;
+        workerMedia.createdAt = OffsetDateTime.now();
+        return workerMedia;
     }
 
     /**
      * Llamado por el job de procesamiento async (thumbnail + EXIF), no por el usuario final.
      */
     public void markProcessingCompleted(String thumbnailUrl, String exifRawPayload,
-                                        String location, UUID savedPlaceId, LkpProcessingStatus completedStatus) {
+                                        String location, UUID savedPlaceId, WorkerLkpProcessingStatus completedStatus) {
         this.thumbnailUrl = thumbnailUrl;
         this.exifRawPayload = exifRawPayload;
         this.location = location;
@@ -139,7 +147,7 @@ public class Media implements Persistable<UUID> {
         this.errorMessage = null;
     }
 
-    public void markProcessingFailed(String errorMessage, LkpProcessingStatus failedStatus) {
+    public void markProcessingFailed(String errorMessage, WorkerLkpProcessingStatus failedStatus) {
         this.errorMessage = errorMessage;
         this.processingStatus = failedStatus;
         this.retryCount = (short) (this.retryCount + 1);

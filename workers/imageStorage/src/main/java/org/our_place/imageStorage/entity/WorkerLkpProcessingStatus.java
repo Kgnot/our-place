@@ -15,7 +15,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LkpProcessingStatus {
+public class WorkerLkpProcessingStatus {
 
     /** CODE natural: pending, processing, completed, failed. */
     @Id

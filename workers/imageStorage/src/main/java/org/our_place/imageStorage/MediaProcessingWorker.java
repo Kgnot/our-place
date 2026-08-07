@@ -3,11 +3,11 @@ package org.our_place.imageStorage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.our_place.gallery.api.events.MediaUploadedEvent;
-import org.our_place.imageStorage.entity.LkpProcessingStatus;
-import org.our_place.imageStorage.entity.Media;
+import org.our_place.imageStorage.entity.WorkerLkpProcessingStatus;
+import org.our_place.imageStorage.entity.WorkerMedia;
 import org.our_place.imageStorage.entity.vo.ProcessingStatus;
-import org.our_place.imageStorage.repository.LkpProcessingStatusRepository;
-import org.our_place.imageStorage.repository.MediaRepository;
+import org.our_place.imageStorage.repository.WorkerLkpProcessingStatusRepository;
+import org.our_place.imageStorage.repository.WorkerMediaRepository;
 import org.our_place.imageStorage.utils.ExifData;
 import org.our_place.imageStorage.utils.ExifExtractor;
 import org.our_place.imageStorage.utils.R2StorageService;
@@ -15,22 +15,25 @@ import org.our_place.imageStorage.utils.ThumbnailGenerator;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class MediaProcessingWorker {
 
-    private final MediaRepository mediaRepository;
+    private final WorkerMediaRepository workerMediaRepository;
     private final R2StorageService r2StorageService;
     private final ThumbnailGenerator thumbnailGenerator;
     private final ExifExtractor exifExtractor;
-    private final LkpProcessingStatusRepository processingStatusRepository;
+    private final WorkerLkpProcessingStatusRepository processingStatusRepository;
 
     @Async("mediaProcessingExecutor")
-    @EventListener
-    @Transactional
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onMediaUploaded(MediaUploadedEvent event) {
         log.info("Processing media {} from R2 key {}", event.mediaId(), event.r2Key());
 
@@ -47,7 +50,7 @@ public class MediaProcessingWorker {
             var exif = exifExtractor.extract(originalBytes, event.mimeType());
 
             // 4. Busca status COMPLETED
-            LkpProcessingStatus completed = processingStatusRepository
+            WorkerLkpProcessingStatus completed = processingStatusRepository
                     .findById(ProcessingStatus.COMPLETED.code())
                     .orElseThrow(() -> new IllegalStateException("lkp_processing_status seed missing: COMPLETED"));
 
@@ -61,8 +64,8 @@ public class MediaProcessingWorker {
             String exifJson = buildExifJson(exif);
 
             // 7. Actualiza entidad
-            Media media = mediaRepository.findById(event.mediaId()).orElseThrow();
-            media.markProcessingCompleted(thumbnailKey, exifJson, locationWkt, null, completed);
+            WorkerMedia workerMedia = workerMediaRepository.findById(event.mediaId()).orElseThrow();
+            workerMedia.markProcessingCompleted(thumbnailKey, exifJson, locationWkt, null, completed);
             //                                                 exifJson ↑    WKT ↑   savedPlaceId=null (lo resuelve otro job)
 
             log.info("Media {} processed successfully", event.mediaId());
@@ -70,12 +73,12 @@ public class MediaProcessingWorker {
         } catch (Exception e) {
             log.error("Failed to process media {}", event.mediaId(), e);
 
-            LkpProcessingStatus failed = processingStatusRepository
+            WorkerLkpProcessingStatus failed = processingStatusRepository
                     .findById(ProcessingStatus.FAILED.code())
                     .orElseThrow(() -> new IllegalStateException("lkp_processing_status seed missing: FAILED"));
 
-            Media media = mediaRepository.findById(event.mediaId()).orElseThrow();
-            media.markProcessingFailed(e.getMessage(), failed);
+            WorkerMedia workerMedia = workerMediaRepository.findById(event.mediaId()).orElseThrow();
+            workerMedia.markProcessingFailed(e.getMessage(), failed);
         }
     }
 

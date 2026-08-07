@@ -47,8 +47,8 @@ public class LoginUseCase implements UseCase<LoginCommand, LoginOutput> {
                 .map(ur -> ur.getRole().getCode())
                 .toList();
 
-        String accessToken = jwtProvider.generateAccessToken(user.getId(), null, user.getEmail(), roles);
-        String refreshToken = jwtProvider.generateRefreshToken(user.getId(), null);
+        String accessToken = jwtProvider.generateAccessToken(user.getId(), user.getEmail(), roles);
+        String refreshToken = jwtProvider.generateRefreshToken(user.getId());
 
         // evento
         bus.publish(new UserLoggedEvent(

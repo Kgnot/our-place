@@ -18,7 +18,7 @@ dependencies {
     implementation libs.jackson.datatype.jsr310
 
     // REST API support
-    implementation libs.spring.boot.starter.data.rest
+//    implementation libs.spring.boot.starter.data.rest
 }
 
 jar {

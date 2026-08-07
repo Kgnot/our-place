@@ -1,4 +1,4 @@
-package org.our_place.ourplacebackend.config.filter;
+package org.our_place.ourplacebackend.config;
 
 
 import org.springframework.context.annotation.Bean;

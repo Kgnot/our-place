@@ -11,7 +11,7 @@ dependencies {
     implementation project(':core:identity')
     implementation project(':shared')
     // REST API support
-    implementation libs.spring.boot.starter.data.rest
+//    implementation libs.spring.boot.starter.data.rest
 }
 
 
