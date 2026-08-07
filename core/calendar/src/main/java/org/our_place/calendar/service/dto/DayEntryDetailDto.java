@@ -10,5 +10,6 @@ public record DayEntryDetailDto(
         LocalDate date,
         String content,
         String moodEmoji,
-        List<MediaSummaryDto> photos   // todas las fotos del día
+        List<MediaSummaryDto> photos,  // todas las fotos del día
+        List<ImportantDateInCalendarDto> importantDates
 ) {}

@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
 import java.util.*;
 
 /**
@@ -41,6 +42,13 @@ public class MediaQueryService {
                 ));
     }
 
+    /**
+     * Obtiene los detalles de una media.
+     *
+     * @param mediaId       ID de la media.
+     * @param currentUserId ID del usuario actual.
+     * @return Detalles de la media.
+     */
     public MediaDetailDto getDetail(UUID mediaId, UUID currentUserId) {
         Media media = mediaRepository.findByIdAndDeletedAtIsNull(mediaId)
                 .orElseThrow(() -> new MediaNotFoundException(mediaId));
@@ -113,4 +121,27 @@ public class MediaQueryService {
                 .toList();
     }
 
+    /**
+     * Fotos de un room en un rango de fechas.
+     */
+    public Page<MediaSummaryDto> listByRoomAndDateRange(UUID roomId, OffsetDateTime start, OffsetDateTime end, Pageable pageable) {
+        return mediaRepository
+                .findByRoomIdAndTakenAtBetweenAndDeletedAtIsNullOrderByTakenAtDesc(roomId, start, end, pageable)
+                .map(MediaServiceMapper::toSummaryDto)
+                .map(dto -> dto.withThumbnailUrl(
+                        r2PresignedUrlGenerator.generateGetUrl(dto.thumbnailUrl())
+                ));
+    }
+
+    /**
+     * Últimas fotos subidas (por createdAt, no takenAt).
+     */
+    public Page<MediaSummaryDto> listLatestByRoom(UUID roomId, Pageable pageable) {
+        return mediaRepository
+                .findByRoomIdAndDeletedAtIsNullOrderByCreatedAtDesc(roomId, pageable)
+                .map(MediaServiceMapper::toSummaryDto)
+                .map(dto -> dto.withThumbnailUrl(
+                        r2PresignedUrlGenerator.generateGetUrl(dto.thumbnailUrl())
+                ));
+    }
 }

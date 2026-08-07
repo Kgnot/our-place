@@ -13,6 +13,7 @@ import org.our_place.shared.application.bus.EventBus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+
 @Component
 @RequiredArgsConstructor
 public class CreateImportantDateUseCase implements UseCase<CreateImportantDateCommand, CreateImportantDateOutput> {
@@ -32,7 +33,6 @@ public class CreateImportantDateUseCase implements UseCase<CreateImportantDateCo
                 command.isRecurring(), command.notifyDaysBefore(), command.createdByUserId()
         );
         importantDateRepository.save(date);
-
         eventBus.publish(new ImportantDateCreatedEvent(date.getId(), command.roomId(), type.getCode(), command.eventDate()));
 
         return new CreateImportantDateOutput(date.getId());

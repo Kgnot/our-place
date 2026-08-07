@@ -1,15 +1,16 @@
-package org.our_place.calendar.usecase.command;
+package org.our_place.calendar.service.dto;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
-public record CreateImportantDateCommand(
-        UUID roomId,
+public record ImportantDateDetailDto(
+        UUID id,
         String typeCode,
+        String typeName,
         String title,
         LocalDate eventDate,
         boolean isRecurring,
         short notifyDaysBefore,
-        UUID createdByUserId
-        ) {
-}
+        List<MediaServiceDto> photos
+) {}

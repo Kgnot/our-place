@@ -244,6 +244,13 @@ CREATE TABLE "calendar"."day_entry_media" (
                                               PRIMARY KEY ("room_id", "entry_date", "media_id")
 );
 
+CREATE TABLE "calendar"."important_date_media" (
+                                                   "important_date_id" uuid NOT NULL,
+                                                   "media_id" uuid NOT NULL,
+                                                   "created_at" timestamptz NOT NULL,
+                                                   PRIMARY KEY ("important_date_id", "media_id")
+);
+
 CREATE TABLE "map"."lkp_place_category" (
                                             "code" varchar(30) PRIMARY KEY,
                                             "name" varchar(100) NOT NULL,
@@ -334,6 +341,8 @@ CREATE INDEX ON "gallery"."workerMedia" ("room_id", "deleted_at");
 CREATE INDEX ON "gallery"."media_comment" ("media_id", "created_at");
 
 CREATE INDEX ON "calendar"."important_date" ("room_id", "event_date");
+
+CREATE INDEX ON "calendar"."important_date_media" ("important_date_id");
 
 CREATE INDEX ON "map"."location_ping" ("room_id", "recorded_at");
 
@@ -618,6 +627,10 @@ ALTER TABLE "gallery"."media_comment" ADD FOREIGN KEY ("media_id") REFERENCES "g
 ALTER TABLE "calendar"."day_entry_media" ADD FOREIGN KEY ("room_id", "entry_date") REFERENCES "calendar"."day_entry" ("room_id", "entry_date") DEFERRABLE INITIALLY IMMEDIATE;
 
 ALTER TABLE "calendar"."important_date" ADD FOREIGN KEY ("type_code") REFERENCES "calendar"."lkp_important_date_type" ("code") DEFERRABLE INITIALLY IMMEDIATE;
+
+ALTER TABLE "calendar"."important_date_media"
+    ADD CONSTRAINT "fk_important_date_media_important_date"
+        FOREIGN KEY ("important_date_id") REFERENCES "calendar"."important_date" ("id") ON DELETE CASCADE;
 
 ALTER TABLE "map"."saved_place" ADD FOREIGN KEY ("category_code") REFERENCES "map"."lkp_place_category" ("code") DEFERRABLE INITIALLY IMMEDIATE;
 

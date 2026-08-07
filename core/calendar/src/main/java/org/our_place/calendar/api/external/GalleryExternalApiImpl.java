@@ -2,8 +2,9 @@ package org.our_place.calendar.api.external;
 
 import lombok.extern.slf4j.Slf4j;
 import org.our_place.gallery.api.GalleryApi;
+import org.our_place.gallery.api.dto_shared.UploadMediaCommandShared;
+import org.our_place.gallery.api.dto_shared.UploadMediaOutputShared;
 import org.our_place.gallery.application.service.dto.MediaSummaryDto;
-import org.our_place.gallery.application.service.mapper.MediaServiceMapper;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -37,7 +38,9 @@ public class GalleryExternalApiImpl implements GalleryExternalApi {
         var media = galleryApi.getMediaById(id);
         return new MediaDto(
                 media.id(),
-                media.thumbnailUrl()
+                media.thumbnailUrl(),
+                media.mediaTypeCode(),
+                media.takenAt()
         );
     }
 
@@ -47,7 +50,9 @@ public class GalleryExternalApiImpl implements GalleryExternalApi {
                 .stream()
                 .map(media -> new MediaDto(
                         media.id(),
-                        media.thumbnailUrl()
+                        media.thumbnailUrl(),
+                        media.mediaTypeCode(),
+                        media.takenAt()
                 )).toList();
         log.info("Resultado por baches: {}", res);
         return res;
@@ -75,5 +80,10 @@ public class GalleryExternalApiImpl implements GalleryExternalApi {
     @Override
     public List<MediaSummaryDto> getMediaByRoomAndDate(UUID roomId, LocalDate date) {
         return getMediaByRoomAndDateRange(roomId, date, date);
+    }
+
+    @Override
+    public UploadMediaOutputShared uploadMedia(UploadMediaCommandShared cmd) {
+        return galleryApi.uploadMedia(cmd);
     }
 }

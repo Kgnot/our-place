@@ -11,5 +11,6 @@ public record CalendarDayDto(
         String moodEmoji,
         boolean hasPhotos,         // hay fotos?
         int photoCount,
-        List<MediaSummaryDto> previewPhotos   // 4 thumbnails
+        List<MediaSummaryDto> previewPhotos,   // 4 thumbnails
+        List<ImportantDateInCalendarDto> importantDates
 ) {}

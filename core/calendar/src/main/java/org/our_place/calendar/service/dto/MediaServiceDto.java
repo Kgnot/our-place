@@ -1,9 +1,9 @@
-package org.our_place.calendar.api.external;
+package org.our_place.calendar.service.dto;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-public record MediaDto(
+public record MediaServiceDto(
         UUID id,
         String thumbnailUrl,
         String mediaTypeCode,
