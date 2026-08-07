@@ -1,17 +1,17 @@
 services:
   db:
-    image: postgres:16-alpine
+    build:
+      context: ./db
+      dockerfile: Dockerfile
     container_name: our_place_db
     environment:
       POSTGRES_DB: ${DB_NAME:-ourplace}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./db/dbv1.sql:/docker-entrypoint-initdb.d/01-dbv1.sql:ro
-      - ./db/datos_iniciales.sql:/docker-entrypoint-initdb.d/02-datos_iniciales.sql:ro
+    ports:
+      - "5432:5432"
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME:-ourplace}" ]
       interval: 5s
