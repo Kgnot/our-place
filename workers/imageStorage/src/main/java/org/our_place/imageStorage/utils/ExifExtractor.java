@@ -41,7 +41,7 @@ public class ExifExtractor {
         var dir = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
         if (dir == null) return null;
 
-        Date date = dir.getDate(ExifSubIFDDirectory.TAG_DATE_TIME_ORIGINAL);
+        Date date = dir.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
         if (date == null) return null;
 
         return date.toInstant().atOffset(ZoneOffset.UTC);

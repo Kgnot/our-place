@@ -8,6 +8,7 @@ description = 'Image Storage Worker - Manages image uploads to R2 (Cloudflare)'
 
 dependencies {
     implementation project(':core:gallery')
+    implementation project(':shared')
     // AWS SDK v2 for R2 compatibility
     implementation(platform(libs.aws.bom))
     implementation(libs.aws.s3)       // S3Client + S3Presigner
