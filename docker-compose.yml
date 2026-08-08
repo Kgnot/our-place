@@ -26,5 +26,7 @@ services:
       NEW_RELIC_LOG_LEVEL: ${NEW_RELIC_LOG_LEVEL:-info}
       NEWRELIC_ACCOUNT_ID: ${NEWRELIC_ACCOUNT_ID}
 
+      FRONTEND_URL_DEV: ${FRONTEND_URL_DEV}
+
     restart: unless-stopped
 
