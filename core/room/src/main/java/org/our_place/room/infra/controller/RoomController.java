@@ -127,4 +127,14 @@ public class RoomController {
                 .toList();
         return ResponseEntity.ok(rooms);
     }
+
+    @GetMapping("/mine/search")
+    public ResponseEntity<List<UserRoomResponse>> searchMyRooms(
+            @RequestParam String q) {
+        UUID userId = securityContextApi.getCurrentUserId();
+        List<UserRoomResponse> rooms = roomQueryService.searchRooms(userId, q).stream()
+                .map(UserRoomResponse::from)
+                .toList();
+        return ResponseEntity.ok(rooms);
+    }
 }

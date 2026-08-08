@@ -16,7 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
-/** Solo lectura — proyecta a DTO, no muta estado. */
+/**
+ * Solo lectura — proyecta a DTO, no muta estado.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -48,6 +50,24 @@ public class RoomQueryService {
 
     public List<UserRoomDto> listActiveRoomsForUser(UUID userLoginId) {
         return roomMemberRepository.findByIdUserLoginIdAndStatus(userLoginId, "active").stream()
+                .map(RoomMapper::toUserRoomDto)
+                .toList();
+    }
+
+    public List<UserRoomDto> searchRooms(UUID userLoginId, String query) {
+        if (query == null || query.isBlank()) {
+            return listActiveRoomsForUser(userLoginId);
+        }
+        return roomMemberRepository.searchByUserAndQuery(userLoginId, "active", query.trim()).stream()
+                .map(RoomMapper::toUserRoomDto)
+                .toList();
+    }
+
+    public List<UserRoomDto> searchRoomsAllStatuses(UUID userLoginId, String query) {
+        if (query == null || query.isBlank()) {
+            return listRoomsForUser(userLoginId);
+        }
+        return roomMemberRepository.searchByUserAndQueryAllStatuses(userLoginId, query.trim()).stream()
                 .map(RoomMapper::toUserRoomDto)
                 .toList();
     }
