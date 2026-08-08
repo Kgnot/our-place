@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS postgis;
+
 DROP SCHEMA IF EXISTS "identity" CASCADE;
 DROP SCHEMA IF EXISTS "billing" CASCADE;
 DROP SCHEMA IF EXISTS "room" CASCADE;
@@ -170,7 +172,7 @@ CREATE TABLE "gallery"."lkp_processing_status" (
                                                    "name" varchar(100) NOT NULL
 );
 
-CREATE TABLE "gallery"."workerMedia" (
+CREATE TABLE "gallery"."media" (
                                    "id" uuid PRIMARY KEY,
                                    "room_id" uuid NOT NULL,
                                    "uploaded_by_user_id" uuid NOT NULL,
@@ -332,11 +334,11 @@ CREATE UNIQUE INDEX ON "identity"."users_login" ("auth_provider", "provider_user
 
 CREATE INDEX ON "room"."room_invitation" ("room_id", "invited_email", "status");
 
-CREATE INDEX ON "gallery"."workerMedia" ("room_id", "taken_at");
+CREATE INDEX ON "gallery"."media" ("room_id", "taken_at");
 
-CREATE INDEX ON "gallery"."workerMedia" ("room_id", "processing_status_code");
+CREATE INDEX ON "gallery"."media" ("room_id", "processing_status_code");
 
-CREATE INDEX ON "gallery"."workerMedia" ("room_id", "deleted_at");
+CREATE INDEX ON "gallery"."media" ("room_id", "deleted_at");
 
 CREATE INDEX ON "gallery"."media_comment" ("media_id", "created_at");
 
@@ -460,31 +462,31 @@ COMMENT ON TABLE "gallery"."lkp_media_type" IS 'CODE natural: image, video';
 
 COMMENT ON TABLE "gallery"."lkp_processing_status" IS 'CODE natural: pending, processing, completed, failed (Cloudflare Queues)';
 
-COMMENT ON TABLE "gallery"."workerMedia" IS 'deleted_at = papelera (soft delete); purge_at = borrado definitivo, gestionado por job periódico';
+COMMENT ON TABLE "gallery"."media" IS 'deleted_at = papelera (soft delete); purge_at = borrado definitivo, gestionado por job periódico';
 
-COMMENT ON COLUMN "gallery"."workerMedia"."id" IS 'UUID: contenido íntimo/privado — un id secuencial permitiría intentar enumerar fotos de otras salas si hay un bug de autorización';
+COMMENT ON COLUMN "gallery"."media"."id" IS 'UUID: contenido íntimo/privado — un id secuencial permitiría intentar enumerar fotos de otras salas si hay un bug de autorización';
 
-COMMENT ON COLUMN "gallery"."workerMedia"."room_id" IS 'SIN FK (cross-schema) -> room.rooms.id. Desacople room<->gallery.';
+COMMENT ON COLUMN "gallery"."media"."room_id" IS 'SIN FK (cross-schema) -> room.rooms.id. Desacople room<->gallery.';
 
-COMMENT ON COLUMN "gallery"."workerMedia"."uploaded_by_user_id" IS 'SIN FK (cross-schema) -> identity.users_login.id.';
+COMMENT ON COLUMN "gallery"."media"."uploaded_by_user_id" IS 'SIN FK (cross-schema) -> identity.users_login.id.';
 
-COMMENT ON COLUMN "gallery"."workerMedia"."media_type_code" IS 'FK real -> gallery.lkp_media_type.code (mismo schema)';
+COMMENT ON COLUMN "gallery"."media"."media_type_code" IS 'FK real -> gallery.lkp_media_type.code (mismo schema)';
 
-COMMENT ON COLUMN "gallery"."workerMedia"."processing_status_code" IS 'FK real -> gallery.lkp_processing_status.code (mismo schema)';
+COMMENT ON COLUMN "gallery"."media"."processing_status_code" IS 'FK real -> gallery.lkp_processing_status.code (mismo schema)';
 
-COMMENT ON COLUMN "gallery"."workerMedia"."saved_place_id" IS 'SIN FK (cross-schema) -> map.saved_place.id. Nullable: se completa async vía job de EXIF.';
+COMMENT ON COLUMN "gallery"."media"."saved_place_id" IS 'SIN FK (cross-schema) -> map.saved_place.id. Nullable: se completa async vía job de EXIF.';
 
 COMMENT ON TABLE "gallery"."media_reaction" IS 'COMPUESTA: la fila ES "este usuario reaccionó a esta foto" (1 reacción por usuario por foto)';
 
-COMMENT ON COLUMN "gallery"."media_reaction"."media_id" IS 'FK real -> gallery.workerMedia.id (mismo schema)';
+COMMENT ON COLUMN "gallery"."media_reaction"."media_id" IS 'FK real -> gallery.media.id (mismo schema)';
 
 COMMENT ON COLUMN "gallery"."media_reaction"."user_login_id" IS 'SIN FK (cross-schema) -> identity.users_login.id.';
 
 COMMENT ON TABLE "gallery"."media_comment" IS 'El orden del hilo se resuelve con el índice (media_id, created_at), no con el id.';
 
-COMMENT ON COLUMN "gallery"."media_comment"."id" IS 'UUID: texto privado escrito dentro de una sala — mismo criterio que affection.love_note y gallery.workerMedia, evita enumeración';
+COMMENT ON COLUMN "gallery"."media_comment"."id" IS 'UUID: texto privado escrito dentro de una sala — mismo criterio que affection.love_note y gallery.media, evita enumeración';
 
-COMMENT ON COLUMN "gallery"."media_comment"."media_id" IS 'FK real -> gallery.workerMedia.id (mismo schema)';
+COMMENT ON COLUMN "gallery"."media_comment"."media_id" IS 'FK real -> gallery.media.id (mismo schema)';
 
 COMMENT ON COLUMN "gallery"."media_comment"."user_login_id" IS 'SIN FK (cross-schema) -> identity.users_login.id.';
 
@@ -512,7 +514,7 @@ COMMENT ON COLUMN "calendar"."day_entry"."room_id" IS 'SIN FK (cross-schema) -> 
 
 COMMENT ON COLUMN "calendar"."day_entry"."created_by_user_id" IS 'SIN FK (cross-schema) -> identity.users_login.id.';
 
-COMMENT ON TABLE "calendar"."day_entry_media" IS 'COMPUESTA: puente N:N puro entre calendar.day_entry y gallery.workerMedia.
+COMMENT ON TABLE "calendar"."day_entry_media" IS 'COMPUESTA: puente N:N puro entre calendar.day_entry y gallery.media.
 FK real (room_id, entry_date) -> calendar.day_entry (room_id, entry_date).
 ';
 
@@ -520,7 +522,7 @@ COMMENT ON COLUMN "calendar"."day_entry_media"."room_id" IS 'Parte de la FK comp
 
 COMMENT ON COLUMN "calendar"."day_entry_media"."entry_date" IS 'Parte de la FK compuesta hacia calendar.day_entry (mismo schema)';
 
-COMMENT ON COLUMN "calendar"."day_entry_media"."media_id" IS 'SIN FK (cross-schema) -> gallery.workerMedia.id. Desacople gallery<->calendar.';
+COMMENT ON COLUMN "calendar"."day_entry_media"."media_id" IS 'SIN FK (cross-schema) -> gallery.media.id. Desacople gallery<->calendar.';
 
 COMMENT ON TABLE "map"."lkp_place_category" IS 'CODE natural: restaurant, park, hotel, first_date';
 
@@ -534,7 +536,7 @@ COMMENT ON COLUMN "map"."saved_place"."created_by_user_id" IS 'SIN FK (cross-sch
 
 COMMENT ON COLUMN "map"."saved_place"."category_code" IS 'FK real -> map.lkp_place_category.code (mismo schema)';
 
-COMMENT ON COLUMN "map"."saved_place"."source_media_id" IS 'SIN FK (cross-schema) -> gallery.workerMedia.id. Puede quedar huérfano si la foto se purga; la app lo ignora en ese caso.';
+COMMENT ON COLUMN "map"."saved_place"."source_media_id" IS 'SIN FK (cross-schema) -> gallery.media.id. Puede quedar huérfano si la foto se purga; la app lo ignora en ese caso.';
 
 COMMENT ON TABLE "map"."location_ping" IS 'Última ubicación conocida de cada usuario = MAX(recorded_at) por user_login_id. Purgado por job periódico.';
 
@@ -556,7 +558,7 @@ COMMENT ON COLUMN "notification"."notification"."actor_user_id" IS 'SIN FK (cros
 
 COMMENT ON COLUMN "notification"."notification"."type_code" IS 'FK real -> notification.lkp_notification_type.code (mismo schema)';
 
-COMMENT ON COLUMN "notification"."notification"."entity_id" IS 'Referencia POLIMÓRFICA sin FK: entity_type indica la tabla (workerMedia, day_entry,
+COMMENT ON COLUMN "notification"."notification"."entity_id" IS 'Referencia POLIMÓRFICA sin FK: entity_type indica la tabla (media, day_entry,
 saved_place...) y entity_id su identificador. Se guarda como texto porque
 las tablas referenciadas usan tipos de PK distintos (uuid vs compuesta):
 para day_entry se guarda como "room_id:entry_date" serializado.
@@ -564,7 +566,7 @@ para day_entry se guarda como "room_id:entry_date" serializado.
 
 COMMENT ON TABLE "pet"."lkp_species" IS 'CODE natural: dog, cat, bird, rabbit, other';
 
-COMMENT ON TABLE "pet"."pets" IS 'Mascota compartida de la sala. avatar_url separado de gallery.workerMedia a propósito: es la foto de perfil, no contenido del álbum.';
+COMMENT ON TABLE "pet"."pets" IS 'Mascota compartida de la sala. avatar_url separado de gallery.media a propósito: es la foto de perfil, no contenido del álbum.';
 
 COMMENT ON COLUMN "pet"."pets"."id" IS 'UUID: dato privado de la sala — evita enumeración de mascotas de otras salas si hay bug de autorización';
 
@@ -578,7 +580,7 @@ COMMENT ON TABLE "affection"."lkp_note_type" IS 'CODE natural: love_note, memory
 
 COMMENT ON TABLE "affection"."love_note" IS 'El orden del feed se resuelve con el índice (room_id, created_at), no con el id — el id ya no es secuencial.';
 
-COMMENT ON COLUMN "affection"."love_note"."id" IS 'UUID: contenido íntimo/privado entre miembros de la sala — mismo criterio que gallery.workerMedia, evita enumeración';
+COMMENT ON COLUMN "affection"."love_note"."id" IS 'UUID: contenido íntimo/privado entre miembros de la sala — mismo criterio que gallery.media, evita enumeración';
 
 COMMENT ON COLUMN "affection"."love_note"."room_id" IS 'SIN FK (cross-schema) -> room.rooms.id.';
 
@@ -616,13 +618,13 @@ ALTER TABLE "room"."member_relationship" ADD FOREIGN KEY ("room_id") REFERENCES 
 
 ALTER TABLE "room"."member_relationship" ADD FOREIGN KEY ("relationship_type_code") REFERENCES "room"."lkp_relationship_type" ("code") DEFERRABLE INITIALLY IMMEDIATE;
 
-ALTER TABLE "gallery"."workerMedia" ADD FOREIGN KEY ("media_type_code") REFERENCES "gallery"."lkp_media_type" ("code") DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE "gallery"."media" ADD FOREIGN KEY ("media_type_code") REFERENCES "gallery"."lkp_media_type" ("code") DEFERRABLE INITIALLY IMMEDIATE;
 
-ALTER TABLE "gallery"."workerMedia" ADD FOREIGN KEY ("processing_status_code") REFERENCES "gallery"."lkp_processing_status" ("code") DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE "gallery"."media" ADD FOREIGN KEY ("processing_status_code") REFERENCES "gallery"."lkp_processing_status" ("code") DEFERRABLE INITIALLY IMMEDIATE;
 
-ALTER TABLE "gallery"."media_reaction" ADD FOREIGN KEY ("media_id") REFERENCES "gallery"."workerMedia" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE "gallery"."media_reaction" ADD FOREIGN KEY ("media_id") REFERENCES "gallery"."media" ("id") DEFERRABLE INITIALLY IMMEDIATE;
 
-ALTER TABLE "gallery"."media_comment" ADD FOREIGN KEY ("media_id") REFERENCES "gallery"."workerMedia" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE "gallery"."media_comment" ADD FOREIGN KEY ("media_id") REFERENCES "gallery"."media" ("id") DEFERRABLE INITIALLY IMMEDIATE;
 
 ALTER TABLE "calendar"."day_entry_media" ADD FOREIGN KEY ("room_id", "entry_date") REFERENCES "calendar"."day_entry" ("room_id", "entry_date") DEFERRABLE INITIALLY IMMEDIATE;
 
